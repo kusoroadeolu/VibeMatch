@@ -8,6 +8,8 @@ import com.victor.VibeMatch.exceptions.AuthorizationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -151,6 +153,13 @@ public class SpotifyAuthServiceImpl implements SpotifyAuthService{
      * @param refreshToken The refresh token to refresh the access token
      * @return A response entity of the token response dto
      * */
+    @Retryable(
+            retryFor = {
+                HttpClientErrorException.class, Exception.class
+            },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     public ResponseEntity<SpotifyTokenResponse> getTokenResponseEntity(String refreshToken){
         ResponseEntity<SpotifyTokenResponse> tokenResponseResponseEntity = restTemplate.exchange(
                 spotifyProviderConfigProperties.getTokenUri(),
