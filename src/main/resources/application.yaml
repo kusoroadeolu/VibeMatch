@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: VibeMatch
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  cache:
+    type: redis
+    time-in-hours: 1
+
+  security:
+    oauth2:
+      client:
+        registration:
+          spotify:
+            client-id: b0c01202a70b45edadd31c6344abcb83
+            client-secret: 59cf295c0154497cbf114e5728351606
+            redirect-uri: "http://127.0.0.1:8080/auth/callback"
+            scope: user-top-read,user-read-email,user-read-private
+            authorization-grant-type: authorization_code
+        provider:
+          spotify:
+            authorization-uri: https://accounts.spotify.com/authorize
+            token-uri: https://accounts.spotify.com/api/token
+            user-info-uri: https://api.spotify.com/v1/me
+            api-uri: https://accounts.spotify.com/api/v1
+            user-name-attribute: me
+
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/vibematch
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MYSQL8Dialect
+      show-sql: true
+      format_sql: true
+
+jwt:
+  secret: 833ca894019d51c760adeb6d10ecfa8d1e6d30ccc12301e6b163be23aa21adb8
+  expiration: 86400
+
+
+
+
