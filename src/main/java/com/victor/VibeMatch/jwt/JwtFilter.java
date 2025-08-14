@@ -41,6 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try{
             spotifyId = jwtService.extractSpotifyId(token);
+            log.info("Successfully extracted spotify ID: {}", spotifyId);
         }catch (Exception e){
             log.warn("Failed to extract the Spotify ID from JWT Token. Token may be invalid or expired. Message: {}", e.getMessage());
             filterChain.doFilter(request, response);

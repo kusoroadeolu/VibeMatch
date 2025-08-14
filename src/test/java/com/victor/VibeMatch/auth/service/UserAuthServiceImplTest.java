@@ -4,7 +4,7 @@ import com.victor.VibeMatch.auth.dtos.LoginResponseDto;
 import com.victor.VibeMatch.auth.dtos.SpotifyTokenResponse;
 import com.victor.VibeMatch.auth.dtos.SpotifyUserProfile;
 import com.victor.VibeMatch.auth.dtos.TokenDto;
-import com.victor.VibeMatch.cache.CacheService;
+import com.victor.VibeMatch.cache.TokenCacheService;
 import com.victor.VibeMatch.exceptions.AuthorizationException;
 import com.victor.VibeMatch.jwt.JwtServiceImpl;
 import com.victor.VibeMatch.security.CustomUserDetailsService;
@@ -38,7 +38,7 @@ class UserAuthServiceImplTest {
     @Mock
     private SpotifyAuthService spotifyAuthService;
     @Mock
-    private CacheService cacheService;
+    private TokenCacheService tokenCacheService;
     @Mock
     private TokenRefreshService tokenRefreshService;
 
@@ -120,7 +120,7 @@ class UserAuthServiceImplTest {
         //when
         when(authMapper.tokenDto(tokenResponse)).thenReturn(tokenDto);
         when(userQueryService.existsBySpotifyId(spotifyId)).thenReturn(true);
-        when(cacheService.cacheToken(spotifyId, tokenDto)).thenReturn(tokenDto);
+        when(tokenCacheService.cacheToken(spotifyId, tokenDto)).thenReturn(tokenDto);
         when(userDetailsService.loadUserBySpotifyId(spotifyId)).thenReturn(userPrincipal);
         when(jwtService.generateToken(userPrincipal)).thenReturn(mockJwtToken);
         when(authMapper.loginResponseDto(mockedResponseDto.username(), mockedResponseDto.refreshToken(), mockJwtToken)).thenReturn(mockedResponseDto);
@@ -154,7 +154,7 @@ class UserAuthServiceImplTest {
 
 
         //When
-        when(cacheService.getCachedToken(spotifyId)).thenReturn(tokenDto);
+        when(tokenCacheService.getCachedToken(spotifyId)).thenReturn(tokenDto);
         when(userQueryService.existsBySpotifyId(spotifyId)).thenReturn(true);
         when(tokenRefreshService.refreshUserAccessToken(spotifyId)).thenReturn(tokenDto);
 
@@ -181,7 +181,7 @@ class UserAuthServiceImplTest {
         authService.logoutUser(spotifyId);
 
         //Verify
-        verify(cacheService, times(1)).evictCachedToken(spotifyId);
+        verify(tokenCacheService, times(1)).evictCachedToken(spotifyId);
 
 
     }

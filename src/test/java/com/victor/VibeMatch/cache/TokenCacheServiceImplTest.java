@@ -19,10 +19,10 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @EnableCaching
-class CacheServiceImplTest {
+class TokenCacheServiceImplTest {
 
     @Autowired
-    private CacheServiceImpl cacheService;
+    private TokenCacheServiceImpl cacheService;
 
     @Autowired
     private CacheManager cacheManager;

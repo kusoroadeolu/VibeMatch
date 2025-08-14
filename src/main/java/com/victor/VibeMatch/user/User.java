@@ -1,16 +1,21 @@
 package com.victor.VibeMatch.user;
 
 import com.victor.VibeMatch.security.Role;
+import com.victor.VibeMatch.userartist.UserArtist;
+import com.victor.VibeMatch.usertrack.recent.UserRecentTrack;
+import com.victor.VibeMatch.usertrack.top.UserTopTrack;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "user", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"spotify_id", "username"})
-})
+}, indexes = @Index(name = "si_index", columnList = "spotifyId"))
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -32,6 +37,9 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    private LocalDateTime lastSyncedAt;
+
+    //TODO Encrypt this
     @Column(nullable = false)
     private String refreshToken;
 
@@ -40,9 +48,25 @@ public class User {
     @Column(nullable = false)
     private String country;
 
+    @Column(nullable = false)
+    @ColumnDefault("true")
+    private boolean isPublic;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserArtist> userArtists;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRecentTrack> userRecentTracks;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTopTrack> userTopTracks;
+
+
+
     @PrePersist
     public void onCreate(){
         this.createdAt = LocalDateTime.now();
     }
+
 
 }

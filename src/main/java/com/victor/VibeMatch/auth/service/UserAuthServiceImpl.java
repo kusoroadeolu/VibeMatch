@@ -4,7 +4,7 @@ import com.victor.VibeMatch.auth.dtos.LoginResponseDto;
 import com.victor.VibeMatch.auth.dtos.SpotifyTokenResponse;
 import com.victor.VibeMatch.auth.dtos.SpotifyUserProfile;
 import com.victor.VibeMatch.auth.dtos.TokenDto;
-import com.victor.VibeMatch.cache.CacheService;
+import com.victor.VibeMatch.cache.TokenCacheService;
 import com.victor.VibeMatch.exceptions.AuthorizationException;
 import com.victor.VibeMatch.jwt.JwtServiceImpl;
 import com.victor.VibeMatch.security.CustomUserDetailsService;
@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static com.victor.VibeMatch.security.Role.USER;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,7 +33,7 @@ public class UserAuthServiceImpl implements UserAuthService{
     private final CustomUserDetailsService userDetailsService;
     private final JwtServiceImpl jwtService;
     private final TokenRefreshService tokenRefreshService;
-    private final CacheService cacheService;
+    private final TokenCacheService tokenCacheService;
 
     /**
      * Logs a user into the app
@@ -56,7 +58,7 @@ public class UserAuthServiceImpl implements UserAuthService{
         saveUserCredentials(spotifyId, tokenResponse, userProfile);
 
         //Cache the access token after save
-        var token = cacheService.cacheToken(spotifyId, tokenDto);
+        var token = tokenCacheService.cacheToken(spotifyId, tokenDto);
 
 
         log.info("Successfully cached token with refresh token: {}", token.refreshToken());
@@ -107,7 +109,7 @@ public class UserAuthServiceImpl implements UserAuthService{
                 .email(spotifyUserProfile.getEmail())
                 .refreshToken(tokenResponse.getRefreshToken())
                 .country(spotifyUserProfile.getCountry())
-                .role(Role.USER)
+                .role(USER)
                 .build();
     }
 
@@ -122,7 +124,7 @@ public class UserAuthServiceImpl implements UserAuthService{
         validateSpotifyId(spotifyId);
 
         //Checks if a token exists for a user in the cache, if not refresh their token
-        var token = cacheService.getCachedToken(spotifyId);
+        var token = tokenCacheService.getCachedToken(spotifyId);
 
         LocalDateTime currentDateTime = LocalDateTime.now();
 
@@ -156,7 +158,7 @@ public class UserAuthServiceImpl implements UserAuthService{
     @Override
     public void logoutUser(String spotifyId){
         validateSpotifyId(spotifyId);
-        cacheService.evictCachedToken(spotifyId);
+        tokenCacheService.evictCachedToken(spotifyId);
         log.info("Successfully evicted user info from cache");
     }
 

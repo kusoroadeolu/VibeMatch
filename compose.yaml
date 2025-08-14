@@ -3,3 +3,13 @@ services:
     image: redis:7.4.2
     ports:
       - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: some-rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    hostname: my-rabbit
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest

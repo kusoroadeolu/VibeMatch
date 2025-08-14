@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -157,7 +156,7 @@ public class SpotifyAuthServiceImpl implements SpotifyAuthService{
             retryFor = {
                 HttpClientErrorException.class, Exception.class
             },
-            maxAttempts = 3,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public ResponseEntity<SpotifyTokenResponse> getTokenResponseEntity(String refreshToken){

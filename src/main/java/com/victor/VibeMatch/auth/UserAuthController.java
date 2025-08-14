@@ -1,10 +1,10 @@
-package com.victor.VibeMatch.user;
+package com.victor.VibeMatch.auth;
 
-import com.victor.VibeMatch.auth.dtos.SpotifyTokenResponse;
 import com.victor.VibeMatch.auth.dtos.TokenDto;
 import com.victor.VibeMatch.auth.service.TokenRefreshService;
 import com.victor.VibeMatch.auth.service.UserAuthServiceImpl;
 import com.victor.VibeMatch.security.UserPrincipal;
+import com.victor.VibeMatch.user.UserResponseDto;
 import com.victor.VibeMatch.user.service.UserQueryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
-public class UserController {
+public class UserAuthController {
 
     private final UserQueryServiceImpl userQueryService;
     private final UserAuthServiceImpl userAuthService;

@@ -1,10 +1,7 @@
 package com.victor.VibeMatch.cache;
 
-import com.victor.VibeMatch.auth.dtos.SpotifyTokenResponse;
 import com.victor.VibeMatch.auth.dtos.TokenDto;
-import com.victor.VibeMatch.auth.service.SpotifyAuthService;
 import com.victor.VibeMatch.auth.service.TokenRefreshService;
-import com.victor.VibeMatch.auth.service.UserAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -13,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CacheServiceImpl implements CacheService{
+public class TokenCacheServiceImpl implements TokenCacheService {
 
     private final TokenRefreshService tokenRefreshService;
 
