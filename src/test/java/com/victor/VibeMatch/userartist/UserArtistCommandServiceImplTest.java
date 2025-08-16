@@ -2,7 +2,6 @@ package com.victor.VibeMatch.userartist;
 
 import com.victor.VibeMatch.exceptions.UserArtistSaveException;
 import com.victor.VibeMatch.user.User; // Assuming User class is accessible
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,10 +23,10 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserArtistCommandService Unit Tests")
-public class UserArtistCommandServiceTest {
+public class UserArtistCommandServiceImplTest {
 
     @InjectMocks
-    private UserArtistCommandService userArtistCommandService;
+    private UserArtistCommandServiceImpl userArtistCommandService;
 
     @Mock
     private UserArtistRepository userArtistRepository;

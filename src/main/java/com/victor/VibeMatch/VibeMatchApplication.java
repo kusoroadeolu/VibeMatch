@@ -10,13 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SpringBootApplication
-@EntityScan({
-		"com.victor.VibeMatch.user",
-		"com.victor.VibeMatch.userartist",
-		"com.victor.VibeMatch.usergenre",
-		"com.victor.VibeMatch.usertrack",
-		"com.victor.VibeMatch.connections"
-})
+@EntityScan("com.victor.VibeMatch")
 @EnableCaching
 @EnableRetry
 public class VibeMatchApplication {

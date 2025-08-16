@@ -87,7 +87,6 @@ public class Test {
 @Getter
 @Setter
 @AllArgsConstructor
-
 class Obj{
     private double mainstream;
     private double discoveryRate;

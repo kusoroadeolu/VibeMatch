@@ -1,6 +1,5 @@
 package com.victor.VibeMatch.synchandler;
 
-import com.victor.VibeMatch.cache.TaskStatus;
 import com.victor.VibeMatch.security.UserPrincipal;
 import com.victor.VibeMatch.synchandler.services.SyncOrchestrator;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +23,7 @@ public class SyncController {
     public ResponseEntity<String> syncUserData(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String spotifyId = userPrincipal.getSpotifyId();
         log.info("Spotify ID: {}", spotifyId);
-        log.info("Before getting the task ID");
         String taskId = syncOrchestrator.scheduleUserSync(spotifyId);
-        log.info("After getting the task ID");
         return new ResponseEntity<>(taskId, HttpStatus.ACCEPTED);
     }
 

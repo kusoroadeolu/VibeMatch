@@ -1,8 +1,8 @@
 package com.victor.VibeMatch.synchandler.impl;
 
-import com.victor.VibeMatch.cache.Task;
+import com.victor.VibeMatch.synchandler.Task;
 import com.victor.VibeMatch.cache.TaskCacheService;
-import com.victor.VibeMatch.cache.TaskStatus;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 import com.victor.VibeMatch.synchandler.services.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

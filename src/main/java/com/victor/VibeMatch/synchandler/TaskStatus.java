@@ -1,4 +1,4 @@
-package com.victor.VibeMatch.cache;
+package com.victor.VibeMatch.synchandler;
 
 import lombok.Getter;
 

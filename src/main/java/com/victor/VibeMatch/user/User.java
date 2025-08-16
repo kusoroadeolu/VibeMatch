@@ -1,6 +1,7 @@
 package com.victor.VibeMatch.user;
 
 import com.victor.VibeMatch.security.Role;
+import com.victor.VibeMatch.tasteprofile.TasteProfile;
 import com.victor.VibeMatch.userartist.UserArtist;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrack;
 import com.victor.VibeMatch.usertrack.top.UserTopTrack;
@@ -61,7 +62,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTopTrack> userTopTracks;
 
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private TasteProfile tasteProfile;
 
     @PrePersist
     public void onCreate(){

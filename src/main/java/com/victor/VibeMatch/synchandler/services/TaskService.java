@@ -1,6 +1,6 @@
 package com.victor.VibeMatch.synchandler.services;
 
-import com.victor.VibeMatch.cache.TaskStatus;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 
 public interface TaskService {
     void saveTask(String taskId, TaskStatus taskStatus);

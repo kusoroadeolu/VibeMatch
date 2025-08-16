@@ -1,20 +1,24 @@
 package com.victor.VibeMatch.synchandler.impl;
 
-import com.victor.VibeMatch.cache.TaskStatus;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 import com.victor.VibeMatch.exceptions.UserSyncException;
 import com.victor.VibeMatch.rabbitmq.RabbitSyncConfigProperties;
 import com.victor.VibeMatch.synchandler.services.TaskService;
 import com.victor.VibeMatch.synchandler.services.UserArtistSyncService;
 import com.victor.VibeMatch.synchandler.services.UserTrackSyncService;
 import com.victor.VibeMatch.user.User;
+import com.victor.VibeMatch.user.service.UserQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,31 +39,38 @@ class SyncOrchestratorImplTest {
 
     @Mock
     private RabbitSyncConfigProperties rabbitSyncConfigProperties;
+
     @Mock
     private TaskService taskService;
+
+    @Mock
+    private UserQueryService userQueryService;
 
     @InjectMocks
     private SyncOrchestratorImpl syncOrchestrator;
 
     private String validTaskId;
     private TaskStatus expectedTaskStatus;
+    private User user;
 
     @BeforeEach
     void setUp() {
         validTaskId = "some-valid-task-id";
         expectedTaskStatus = TaskStatus.SUCCESS;
+        user = User.builder().lastSyncedAt(LocalDateTime.now().minusDays(1)).build();
     }
 
     @Test
     public void shouldSyncAllData(){
         //Arrange
         String spotifyId = "spotify_id";
-        User user = User.builder().build();
+        User user = User.builder().spotifyId(spotifyId).build();
 
         //Act
-        syncOrchestrator.syncAllData(spotifyId, user);
+        LocalDateTime syncedAt = syncOrchestrator.syncAllData(user);
 
         //Assert
+        assertNotNull(syncedAt);
         verify(userArtistSyncService, times(1)).syncUserArtist(user, spotifyId);
         verify(userTrackSyncService, times(1)).syncRecentUserTracks(user, spotifyId);
         verify(userTrackSyncService, times(1)).syncTopUserTracks(user, spotifyId);
@@ -69,12 +80,15 @@ class SyncOrchestratorImplTest {
     public void shouldScheduleUserSync(){
         //Arrange
         String spotifyId = "spotify_id";
-
         TaskStatus status = TaskStatus.PENDING;
 
-        //Act
+        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+        when(taskService.getTaskStatus(spotifyId)).thenReturn(null);
         when(rabbitSyncConfigProperties.getExchangeName()).thenReturn("sync_exchange");
         when(rabbitSyncConfigProperties.getRoutingKey()).thenReturn("sync_key");
+
+
+        //Act
         String mockTaskId = syncOrchestrator.scheduleUserSync(spotifyId);
 
         //Assert
@@ -86,6 +100,52 @@ class SyncOrchestratorImplTest {
                 eq(spotifyId),
                 any(MessagePostProcessor.class)
         );
+    }
+
+    @Test
+    public void scheduleUserSync_shouldThrowUserSyncException_givenPendingStatus(){
+        //Arrange
+        String spotifyId = "spotify_id";
+
+        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+        when(taskService.getTaskStatus(spotifyId)).thenReturn(TaskStatus.PENDING);
+
+
+        //Act
+        assertThrows(UserSyncException.class, () -> {
+            syncOrchestrator.scheduleUserSync(spotifyId);
+        });
+    }
+
+    @Test
+    public void scheduleUserSync_shouldThrowUserSyncException_givenSuccessStatus(){
+        //Arrange
+        String spotifyId = "spotify_id";
+
+        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+        when(taskService.getTaskStatus(spotifyId)).thenReturn(TaskStatus.PENDING);
+
+
+        //Act
+        assertThrows(UserSyncException.class, () -> {
+            syncOrchestrator.scheduleUserSync(spotifyId);
+        });
+    }
+
+    @Test
+    public void scheduleUserSync_shouldThrowUserSyncException_ifUserHasSyncedRecently(){
+        //Arrange
+        String spotifyId = "spotify_id";
+        user.setLastSyncedAt(LocalDateTime.now());
+
+        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+        when(taskService.getTaskStatus(spotifyId)).thenReturn(null);
+
+
+        //Act
+        assertThrows(UserSyncException.class, () -> {
+            syncOrchestrator.scheduleUserSync(spotifyId);
+        });
     }
 
     @Test
@@ -166,5 +226,50 @@ class SyncOrchestratorImplTest {
         });
 
         assertEquals("Spotify ID cannot be null or empty", exception.getMessage());
+    }
+
+    @Test
+    public void hasSyncedRecently_shouldReturnTrue_ifLastSyncWasMoreThan12HoursAgo(){
+        //Arrange
+        LocalDateTime now = LocalDateTime.now();
+        User user = Mockito.mock(User.class);
+
+        //Act
+        when(user.getLastSyncedAt()).thenReturn(LocalDateTime.now().minusDays(1));
+        boolean hasSyncedPreviously = syncOrchestrator.hasSyncedRecently(now, user);
+
+        //Assert
+        assertFalse(hasSyncedPreviously);
+
+    }
+
+    @Test
+    public void hasSyncedPreviously_shouldReturnTrue_ifLastSyncedAtIsNull(){
+        //Arrange
+        LocalDateTime now = LocalDateTime.now();
+        User user = Mockito.mock(User.class);
+
+        //Act
+        when(user.getLastSyncedAt()).thenReturn(null);
+        boolean hasSyncedPreviously = syncOrchestrator.hasSyncedRecently(now, user);
+
+        //Assert
+        assertFalse(hasSyncedPreviously);
+
+    }
+
+    @Test
+    public void hasSyncedRecently_shouldReturnFalse_ifLastSyncWasLessThan12HoursAgo(){
+        //Arrange
+        LocalDateTime now = LocalDateTime.now();
+        User user = Mockito.mock(User.class);
+
+        //Act
+        when(user.getLastSyncedAt()).thenReturn(LocalDateTime.now());
+        boolean hasSyncedPreviously = syncOrchestrator.hasSyncedRecently(now, user);
+
+        //assert
+        assertTrue(hasSyncedPreviously);
+
     }
 }

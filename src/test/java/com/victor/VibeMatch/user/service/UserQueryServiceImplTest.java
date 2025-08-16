@@ -9,10 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -183,8 +184,6 @@ class UserQueryServiceImplTest {
     public void existsBySpotifyId_shouldReturnTrue_whenUserExists(){
         // Arrange
         String spotifyId = "mock-id";
-
-        // When
         when(userRepository.existsBySpotifyId(spotifyId)).thenReturn(true);
 
         // Act
@@ -199,8 +198,6 @@ class UserQueryServiceImplTest {
     public void existsBySpotifyId_shouldReturnFalse_whenUserDoesNotExist(){
         // Arrange
         String spotifyId = "non-existent-id";
-
-        // When
         when(userRepository.existsBySpotifyId(spotifyId)).thenReturn(false);
 
         // Act
@@ -210,4 +207,32 @@ class UserQueryServiceImplTest {
         assertFalse(exists);
         verify(userRepository, times(1)).existsBySpotifyId(spotifyId);
     }
+
+    @Test
+    public void findByUserId_shouldReturnUser_ifUserExists(){
+        //Arrange
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        //Act
+        User mockUser = userQueryService.findByUserId(userId);
+
+        //Assert
+        assertNotNull(mockUser);
+        assertEquals(user, mockUser);
+        verify(userRepository, times(1)).findById(userId);
+    }
+
+    @Test
+    public void findByUserId_shouldThrowUserNotFoundEx_ifUserDoesNotExist(){
+        //Arrange
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        assertThrows(NoSuchUserException.class, () -> {
+           userQueryService.findByUserId(userId);
+        });
+    }
+
 }

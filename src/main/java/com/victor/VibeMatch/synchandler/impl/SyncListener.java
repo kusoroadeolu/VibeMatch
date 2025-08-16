@@ -1,6 +1,6 @@
 package com.victor.VibeMatch.synchandler.impl;
 
-import com.victor.VibeMatch.cache.TaskStatus;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 import com.victor.VibeMatch.exceptions.SpotifyRateLimitException;
 import com.victor.VibeMatch.exceptions.UserSyncException;
 import com.victor.VibeMatch.synchandler.services.SyncOrchestrator;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +26,8 @@ import java.time.LocalDateTime;
 public class SyncListener {
 
 
-    private final UserQueryService userQueryService;
     private final UserCommandService userCommandService;
+    private final UserQueryService userQueryService;
     private final TaskService taskService;
     private final RabbitTemplate rabbitTemplate;
     private final SyncOrchestrator syncOrchestrator;
@@ -37,21 +38,18 @@ public class SyncListener {
      * */
     @RabbitListener(queues = "sync-queue")
     public void queueUsers(Message message) throws IOException {
+        log.info("Sync Queue Hit");
         String spotifyId = new String(message.getBody());
-        String taskId = message.getMessageProperties().getHeader("taskId");
 
+        String taskId = (String) message
+                .getMessageProperties()
+                .getHeader("taskId");
 
         User user = userQueryService.findBySpotifyId(spotifyId);
-        LocalDateTime now = LocalDateTime.now();
-
-        if(hasSyncedPreviously(now, user)){
-            log.warn("User: {} has synced within the last 12 hours.", user.getUsername());
-            throw new UserSyncException(String.format("User: %s has synced within the last 12 hours.", user.getUsername()));
-        }
 
         try{
-            syncOrchestrator.syncAllData(spotifyId, user);
-            user.setLastSyncedAt(now);
+            LocalDateTime syncedAt = syncOrchestrator.syncAllData(user);
+            user.setLastSyncedAt(syncedAt);
             userCommandService.saveUser(user);
             taskService.saveTask(taskId, TaskStatus.SUCCESS);
 
@@ -66,12 +64,6 @@ public class SyncListener {
             throw new AmqpRejectAndDontRequeueException("Processing failed due to an unexpected error", e);
         }
 
-    }
-
-    //Checks if a user has synced previously
-    public boolean hasSyncedPreviously(LocalDateTime now, User user){
-        LocalDateTime lastSyncedAt = user.getLastSyncedAt();
-        return lastSyncedAt != null && lastSyncedAt.plusHours(12).isAfter(now);
     }
 
     public void handleSpotifyRateLimitException(Message message, SpotifyRateLimitException e, String spotifyId, String taskId){

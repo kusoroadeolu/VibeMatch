@@ -1,6 +1,6 @@
 package com.victor.VibeMatch.synchandler.impl;
 
-import com.victor.VibeMatch.cache.TaskStatus;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 import com.victor.VibeMatch.exceptions.SpotifyRateLimitException;
 import com.victor.VibeMatch.synchandler.services.SyncOrchestrator;
 import com.victor.VibeMatch.synchandler.services.TaskService;
@@ -23,6 +23,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,59 +31,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SyncListenerTest {
 
-    @InjectMocks
-    private SyncListener syncListener;
 
-    @Test
-    public void hasSyncedPreviously_shouldReturnTrue_ifLastSyncWasMoreThan12HoursAgo(){
-        //Arrange
-        LocalDateTime now = LocalDateTime.now();
-        User user = Mockito.mock(User.class);
-
-        //Act
-        when(user.getLastSyncedAt()).thenReturn(LocalDateTime.now().minusDays(1));
-        boolean hasSyncedPreviously = syncListener.hasSyncedPreviously(now, user);
-
-        //Assert
-        assertFalse(hasSyncedPreviously);
-
-    }
-
-    @Test
-    public void hasSyncedPreviously_shouldReturnTrue_ifLastSyncedAtIsNull(){
-        //Arrange
-        LocalDateTime now = LocalDateTime.now();
-        User user = Mockito.mock(User.class);
-
-        //Act
-        when(user.getLastSyncedAt()).thenReturn(null);
-        boolean hasSyncedPreviously = syncListener.hasSyncedPreviously(now, user);
-
-        //Assert
-        assertFalse(hasSyncedPreviously);
-
-    }
-
-    @Test
-    public void hasSyncedPreviously_shouldReturnFalse_ifLastSyncWasLessThan12HoursAgo(){
-        //Arrange
-        LocalDateTime now = LocalDateTime.now();
-        User user = Mockito.mock(User.class);
-
-        //Act
-        when(user.getLastSyncedAt()).thenReturn(LocalDateTime.now());
-        boolean hasSyncedPreviously = syncListener.hasSyncedPreviously(now, user);
-
-        //assert
-        assertTrue(hasSyncedPreviously);
-
-    }
-
-    @Nested
-    @ExtendWith(MockitoExtension.class)
-    public class InnerClass{
-        @Mock
-        private UserQueryService userQueryService;
         @Mock
         private UserCommandService userCommandService;
         @Mock
@@ -91,6 +40,9 @@ class SyncListenerTest {
         private RabbitTemplate rabbitTemplate;
         @Mock
         private SyncOrchestrator syncOrchestrator;
+
+        @Mock
+        private UserQueryService userQueryService;
 
         @Mock
         private Message message;
@@ -111,19 +63,21 @@ class SyncListenerTest {
             taskId = "task_id";
             user = User.builder().lastSyncedAt(LocalDateTime.now().minusDays(1)).build();
             when(message.getBody()).thenReturn(spotifyId.getBytes());
-            when(messageProperties.getHeader(eq("taskId"))).thenReturn(taskId);
             when(message.getMessageProperties()).thenReturn(messageProperties);
+            when(messageProperties.getHeader(eq("taskId"))).thenReturn(taskId);
         }
 
 
         @Test
         public void shouldQueueUsers() throws IOException {
-            //Act
+            //Arrange
             when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+
+            //Act
             syncListener.queueUsers(message);
 
             //Assert
-            verify(syncOrchestrator, times(1)).syncAllData(spotifyId, user);
+            verify(syncOrchestrator, times(1)).syncAllData(user);
             verify(userCommandService, times(1)).saveUser(user);
             verify(taskService, times(1)).saveTask(taskId, TaskStatus.SUCCESS);
         }
@@ -131,21 +85,22 @@ class SyncListenerTest {
         @Test
         public void queueUsers_shouldThrowAmqpEx_onRateLimitEx() throws IOException {
             //Arrange
-            when(messageProperties.getReceivedRoutingKey()).thenReturn(anyString());
+            String mockKey = "mock-key";
             when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+            when(messageProperties.getReceivedRoutingKey()).thenReturn(mockKey);
 
             //Act
-            doThrow(new SpotifyRateLimitException("", 50)).when(syncOrchestrator).syncAllData(spotifyId, user);
+            doThrow(new SpotifyRateLimitException("", 50)).when(syncOrchestrator).syncAllData(user);
 
             //Assert
             assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
-                when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
                 syncListener.queueUsers(message);
             });
+
             verify(taskService, times(1)).saveTask(taskId, TaskStatus.RETRYING);
             verify(rabbitTemplate, times(1)).convertAndSend(
                     eq("sync-exchange.dlx"),
-                    anyString(),
+                    eq("mock-key"),
                     anyString(),
                     any(MessagePostProcessor.class)
             );
@@ -155,15 +110,14 @@ class SyncListenerTest {
         @Test
         public void queueUsers_shouldThrowAmqpException_onGenericException() throws IOException {
             //Arrange
-            doThrow(new RuntimeException("Generic failure")).when(syncOrchestrator).syncAllData(spotifyId, user);
+            when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
+            doThrow(new RuntimeException("Generic failure")).when(syncOrchestrator).syncAllData(user);
 
             //Act & Assert
             assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
-                when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
                 syncListener.queueUsers(message);
             });
             verify(userCommandService, never()).saveUser(user);
         }
     }
 
-}

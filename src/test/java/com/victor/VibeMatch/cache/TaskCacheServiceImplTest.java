@@ -1,5 +1,7 @@
 package com.victor.VibeMatch.cache;
 
+import com.victor.VibeMatch.synchandler.Task;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

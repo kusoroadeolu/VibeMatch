@@ -18,7 +18,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
 
-
     @ExceptionHandler(NoSuchUserException.class)
     public ResponseEntity<ApiError> handleNoSuchUserException(NoSuchUserException e){
         ApiError apiError = new ApiError(e.getMessage(), 404, LocalDateTime.now());
@@ -31,11 +30,30 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(UserArtistSaveException.class)
-    public ResponseEntity<ApiError> handleUserArtistSaveException(UserArtistSaveException e){
+    // User-Artist related exceptions
+    @ExceptionHandler({UserArtistSaveException.class, UserArtistDeletionException.class})
+    public ResponseEntity<ApiError> handleUserArtistException(RuntimeException e){
         ApiError apiError = new ApiError(e.getMessage(), 500, LocalDateTime.now());
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // User-Track related exceptions
+    @ExceptionHandler({UserTrackSaveException.class, UserTrackDeletionException.class})
+    public ResponseEntity<ApiError> handleUserTrackException(RuntimeException e){
+        ApiError apiError = new ApiError(e.getMessage(), 500, LocalDateTime.now());
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
+    // General/External API exceptions
+    @ExceptionHandler({DataFetchException.class, UserSyncException.class})
+    public ResponseEntity<ApiError> handleDataAndSyncException(RuntimeException e) {
+        ApiError apiError = new ApiError(e.getMessage(), 500, LocalDateTime.now());
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(SpotifyRateLimitException.class)
+    public ResponseEntity<ApiError> handleSpotifyRateLimitException(SpotifyRateLimitException e) {
+        ApiError apiError = new ApiError(e.getMessage(), 429, LocalDateTime.now());
+        return new ResponseEntity<>(apiError, HttpStatus.TOO_MANY_REQUESTS);
+    }
 }

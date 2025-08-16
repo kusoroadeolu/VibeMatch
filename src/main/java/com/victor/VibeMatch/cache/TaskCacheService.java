@@ -1,8 +1,6 @@
 package com.victor.VibeMatch.cache;
 
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import com.victor.VibeMatch.synchandler.Task;
 
 public interface TaskCacheService {
     Task saveTask(String taskId, Task task);

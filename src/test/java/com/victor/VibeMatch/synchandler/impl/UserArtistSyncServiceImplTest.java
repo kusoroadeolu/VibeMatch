@@ -10,7 +10,7 @@ import com.victor.VibeMatch.spotify.dto.SpotifyArtist;
 import com.victor.VibeMatch.spotify.dto.SpotifyDataRequestDto;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.userartist.UserArtist;
-import com.victor.VibeMatch.userartist.UserArtistCommandService;
+import com.victor.VibeMatch.userartist.UserArtistCommandServiceImpl;
 import com.victor.VibeMatch.userartist.mapper.UserArtistMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ class UserArtistSyncServiceImplTest {
     private UserArtistMapper userArtistMapper;
 
     @Mock
-    private UserArtistCommandService userArtistCommandService;
+    private UserArtistCommandServiceImpl userArtistCommandService;
 
     @Mock
     private SpotifyDataOrchestratorService<Object> orchestratorService;

@@ -11,6 +11,7 @@ import com.victor.VibeMatch.synchandler.services.UserArtistSyncService;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.userartist.UserArtist;
 import com.victor.VibeMatch.userartist.UserArtistCommandService;
+import com.victor.VibeMatch.userartist.UserArtistCommandServiceImpl;
 import com.victor.VibeMatch.userartist.mapper.UserArtistMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

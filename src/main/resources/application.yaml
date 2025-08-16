@@ -31,7 +31,9 @@ spring:
 
   cache:
     type: redis
-    time-in-hours: 1
+    token-time-in-hours: 1
+    profile-time-in-hours: 1
+
 
   security:
     oauth2:
