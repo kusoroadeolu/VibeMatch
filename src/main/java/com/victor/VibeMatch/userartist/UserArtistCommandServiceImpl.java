@@ -1,6 +1,8 @@
 package com.victor.VibeMatch.userartist;
 
+import com.victor.VibeMatch.exceptions.UserArtistDeletionException;
 import com.victor.VibeMatch.exceptions.UserArtistSaveException;
+import com.victor.VibeMatch.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,6 +20,7 @@ public class UserArtistCommandServiceImpl implements UserArtistCommandService {
     @Override
     public List<UserArtist> saveUserArtists(List<UserArtist> userArtists){
         int size = userArtists.size();
+
         try{
             log.info("Attempting to save {} user artists.", size);
             var saved = userArtistRepository.saveAll(userArtists);
@@ -32,6 +35,26 @@ public class UserArtistCommandServiceImpl implements UserArtistCommandService {
 
         }
     }
+
+    @Override
+    public void deleteByUser(User user){
+
+        if(user == null){
+            log.info("User cannot be null");
+            throw new UserArtistDeletionException("User cannot be null");
+        }
+
+        try{
+            log.info("Attempting to delete all user artists for user: {}", user.getUsername());
+            userArtistRepository.deleteByUser(user);
+            log.info("Successfully deleted all user artists for user: {}", user.getUsername());
+        }catch (Exception e){
+            log.info("An error occurred while trying to delete user artists for user: {}", user.getUsername());
+            throw new UserArtistDeletionException(String.format("An error occurred while trying to delete user artists for user: %s", user.getUsername()));
+        }
+    }
+
+
 
 
 }

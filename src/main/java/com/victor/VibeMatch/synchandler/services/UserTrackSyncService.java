@@ -7,7 +7,7 @@ import com.victor.VibeMatch.usertrack.top.UserTopTrack;
 import java.util.List;
 
 public interface UserTrackSyncService {
-    List<UserRecentTrack> syncRecentUserTracks(User user, String spotifyId);
+    List<UserRecentTrack> syncRecentUserTracks(User user);
 
-    List<UserTopTrack> syncTopUserTracks(User user, String spotifyId);
+    List<UserTopTrack> syncTopUserTracks(User user);
 }

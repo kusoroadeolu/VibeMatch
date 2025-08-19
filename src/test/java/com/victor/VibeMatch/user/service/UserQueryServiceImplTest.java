@@ -10,8 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -233,6 +234,57 @@ class UserQueryServiceImplTest {
         assertThrows(NoSuchUserException.class, () -> {
            userQueryService.findByUserId(userId);
         });
+    }
+
+    @Test
+    public void findAllUsers_shouldReturnAListOfAllUsersInTheDB(){
+        //Arrange
+        List<User> users = List.of(User.builder().username("user1").build(), User.builder().username("user2").build());
+        when(userRepository.findAll()).thenReturn(users);
+
+        //Act
+        List<User> foundUsers = userQueryService.findAllUsers();
+
+        //Assert
+        assertNotNull(foundUsers);
+        assertEquals(users.getFirst().getUsername(), foundUsers.getFirst().getUsername());
+        assertEquals(users.get(1).getUsername(), foundUsers.get(1).getUsername());
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void findByLastSyncedByBefore_givenThreshold_shouldReturnAListOfUsersSyncedLastSyncedAtBeforeTheThreshold(){
+        //Arrange
+        LocalDateTime threshold = LocalDateTime.now().minusDays(12);
+        List<User> users = List.of(User.builder().username("user1").lastSyncedAt(LocalDateTime.now().minusDays(2)).build(), User.builder().username("user2").lastSyncedAt(LocalDateTime.now().minusDays(3)).build());
+        when(userRepository.findByLastSyncedAtBefore(threshold)).thenReturn(users);
+
+        //Act
+        List<User> foundUsers = userQueryService.findByLastSyncedAtBefore(threshold);
+
+        //Assert
+        assertNotNull(foundUsers);
+        assertEquals(2, foundUsers.size());
+        assertEquals(users.getFirst().getUsername(), foundUsers.getFirst().getUsername());
+        assertEquals(users.get(1).getUsername(), foundUsers.get(1).getUsername());
+        verify(userRepository, times(1)).findByLastSyncedAtBefore(threshold);
+
+    }
+
+    @Test
+    public void findByLastSyncedAtBefore_givenThreshold_shouldReturnAnEmptyList(){
+        //Arrange
+        LocalDateTime threshold = LocalDateTime.now().minusDays(1);
+        when(userRepository.findByLastSyncedAtBefore(threshold)).thenReturn(List.of());
+
+        //Act
+        List<User> foundUsers = userQueryService.findByLastSyncedAtBefore(threshold);
+
+        //Assert
+        assertNotNull(foundUsers);
+        assertEquals(0, foundUsers.size());
+        verify(userRepository, times(1)).findByLastSyncedAtBefore(threshold);
+
     }
 
 }

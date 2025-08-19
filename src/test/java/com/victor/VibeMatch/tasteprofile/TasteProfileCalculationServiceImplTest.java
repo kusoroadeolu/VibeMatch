@@ -52,13 +52,12 @@ class TasteProfileCalculationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder().id(UUID.randomUUID()).username("testUser").build();
 
         // Create sample UserArtist data for tests
         userArtists = new ArrayList<>();
-        UserArtist artist1 = UserArtist.builder().genres(Set.of("pop", "rock")).popularity(80).build();
-        UserArtist artist2 = UserArtist.builder().genres(Set.of("pop", "hip hop")).popularity(90).build();
-        UserArtist artist3 = UserArtist.builder().genres(Set.of("hip hop")).popularity(70).build();
+        UserArtist artist1 = UserArtist.builder().name("artist1").ranking(1).genres(Set.of("pop", "rock")).popularity(80).build();
+        UserArtist artist2 = UserArtist.builder().name("artist2").ranking(2).genres(Set.of("pop", "hip hop")).popularity(90).build();
+        UserArtist artist3 = UserArtist.builder().name("artist3").ranking(3).genres(Set.of("hip hop")).popularity(70).build();
         UserArtist artist4 = UserArtist.builder().genres(Set.of("pop")).popularity(85).build();
         UserArtist artist5 = UserArtist.builder().genres(Set.of("rock", "indie")).popularity(75).build();
 
@@ -109,12 +108,19 @@ class TasteProfileCalculationServiceImplTest {
         userTopTracks.add(UserTopTrack.builder()
                 .name("Top Track 5").artistNames(Set.of("Artist Q")).artistIds(Set.of("idq"))
                 .trackSpotifyId("toptrack5").ranking(5).popularity(88).user(testUser).build());
+
+        testUser = User.builder()
+                .id(UUID.randomUUID())
+                .username("testUser")
+                .userArtists(userArtists)
+                .userRecentTracks(userRecentTracks)
+                .userTopTracks(userTopTracks)
+                .build();
     }
 
     @Test
     void calculateTopGenres_shouldReturnCorrectTasteWrappersForValidUser() {
         // Arrange
-        when(userArtistQueryService.findArtistsByUser(testUser)).thenReturn(userArtists);
         TasteWrapper tasteWrapper1 = TasteWrapper.builder().name("pop").percentage(37.5d).count(3).build();
         TasteWrapper tasteWrapper2 = TasteWrapper.builder().name("rock").percentage(25.0d).count(3).build();
         TasteWrapper tasteWrapper3 = TasteWrapper.builder().name("hip hop").percentage(25.0d).count(3).build();
@@ -148,18 +154,13 @@ class TasteProfileCalculationServiceImplTest {
     @Test
     void calculateTopGenres_shouldHandleNoArtistsFound() {
         // Arrange
-        when(userArtistQueryService.findArtistsByUser(testUser)).thenReturn(Collections.emptyList());
-        when(tasteProfileUtils.getAllGenres(Collections.emptyList())).thenReturn(Collections.emptyList());
-        when(tasteProfileUtils.getTopGenres(Collections.emptyList())).thenReturn(Collections.emptyMap());
+        User user = User.builder().username("username").build();
 
         // Act
         List<TasteWrapper> result = tasteProfileCalculationService.calculateTopGenres(testUser);
 
         // Assert
-        verify(userArtistQueryService).findArtistsByUser(testUser);
-        verify(tasteProfileUtils).getAllGenres(Collections.emptyList());
-        verify(tasteProfileUtils).getTopGenres(Collections.emptyList());
-        verifyNoInteractions(tasteWrapperUtils); // No TasteWrappers should be built
+        verifyNoInteractions(tasteWrapperUtils);
         assertTrue(result.isEmpty(), "Result list should be empty if no artists are found.");
     }
 
@@ -167,7 +168,7 @@ class TasteProfileCalculationServiceImplTest {
     void calculateTopGenres_shouldHandleFewerThanThreeTopGenres() {
         // Arrange
         List<UserArtist> singleArtistList = List.of(UserArtist.builder().genres(Set.of("jazz")).build());
-        when(userArtistQueryService.findArtistsByUser(testUser)).thenReturn(singleArtistList);
+        User user = User.builder().username("username").userArtists(singleArtistList).build();
 
         List<String> singleGenreList = List.of("jazz");
         when(tasteProfileUtils.getAllGenres(singleArtistList)).thenReturn(singleGenreList);
@@ -179,10 +180,9 @@ class TasteProfileCalculationServiceImplTest {
                 .thenReturn(TasteWrapper.builder().name("jazz").percentage(100.0f).count(1).build());
 
         // Act
-        List<TasteWrapper> result = tasteProfileCalculationService.calculateTopGenres(testUser);
+        List<TasteWrapper> result = tasteProfileCalculationService.calculateTopGenres(user);
 
         // Assert
-        verify(userArtistQueryService).findArtistsByUser(testUser);
         verify(tasteProfileUtils).getAllGenres(singleArtistList);
         verify(tasteProfileUtils).getTopGenres(singleArtistList);
         verify(tasteWrapperUtils, times(1)).buildTasteWrapper("jazz", 100.0f, 1);
@@ -197,8 +197,9 @@ class TasteProfileCalculationServiceImplTest {
     @Test
     public void calculateTopArtists_shouldReturnTopThreeArtists(){
         //Arrange
+        User user = User.builder().username("username").build();
         List<UserArtist> artists = List.of(userArtists.getFirst(), userArtists.get(1), userArtists.get(2));
-        when(userArtistQueryService.findArtistsByUserOrderByRanking(testUser, 3)).thenReturn(artists);
+        when(userArtistQueryService.findArtistsByUserOrderByRanking(user, 3)).thenReturn(artists);
 
         TasteWrapper tasteWrapper1 = TasteWrapper.builder().name("artist1").ranking(1).build();
         TasteWrapper tasteWrapper2 = TasteWrapper.builder().name("artist2").ranking(2).build();
@@ -209,7 +210,7 @@ class TasteProfileCalculationServiceImplTest {
         when(tasteWrapperUtils.buildTasteWrapper("artist3", 3)).thenReturn(tasteWrapper3);
 
         //Act
-        List<TasteWrapper> mockWrappers = tasteProfileCalculationService.calculateTopArtists(testUser);
+        List<TasteWrapper> mockWrappers = tasteProfileCalculationService.calculateTopArtists(user);
 
         //Assert
         assertNotNull(mockWrappers);
@@ -238,11 +239,6 @@ class TasteProfileCalculationServiceImplTest {
 
     @Test
     public void shouldCalculateMainstreamScore(){
-        //Arrange
-        when(userArtistQueryService.findArtistsByUser(testUser)).thenReturn(userArtists);
-        when(userTopTrackQueryService.findByUser(testUser)).thenReturn(userTopTracks);
-        when(userRecentTrackQueryService.findByUser(testUser)).thenReturn(userRecentTracks);
-
         double expectedArtistAvg = 80.0d;
         double expectedTopTrackAvg = 66.0d;
         double expectedRecentTrackAvg = 86.6d;
@@ -263,7 +259,7 @@ class TasteProfileCalculationServiceImplTest {
     }
 
     @Test
-    public void shouldCalculateDiscoveryRate(){
+    public void shouldCalculateDiscoveryPattern(){
             // Arrange
             UserTopTrack topTrack1 = UserTopTrack.builder()
                     .id(UUID.randomUUID())
@@ -289,16 +285,15 @@ class TasteProfileCalculationServiceImplTest {
                     .build();
 
             List<UserRecentTrack> recentTracks = List.of(recentTrack1, recentTrack2);
+            User user = User.builder().username("username").userTopTracks(topTracks).userRecentTracks(recentTracks).build();
 
             double expectedDiscoveryRate = 0.5;
-            when(userTopTrackQueryService.findByUser(testUser)).thenReturn(topTracks);
-            when(userRecentTrackQueryService.findByUser(testUser)).thenReturn(recentTracks);
             when(tasteProfileUtils.calculateDiscoveryRate(topTracks, recentTracks)).thenReturn(expectedDiscoveryRate);
 
             // Act
-            double actualDiscoveryRate = tasteProfileCalculationService.calculateDiscoveryPattern(testUser);
+            double actualDiscoveryRate = tasteProfileCalculationService.calculateDiscoveryPattern(user);
 
             // Assert
-            assertEquals(expectedDiscoveryRate, actualDiscoveryRate, 0.001); // Use a delta for double comparison
+            assertEquals(expectedDiscoveryRate, actualDiscoveryRate, 0.001);
         }
 }

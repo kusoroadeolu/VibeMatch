@@ -38,21 +38,25 @@ public class UserArtistSyncServiceImpl<T> implements UserArtistSyncService {
 
     /**
      * Sync User Artist Data
-     * @param spotifyId The spotify ID of the user
+     * @param user The user being synced
      * */
     @Override
-    public List<UserArtist> syncUserArtist(User user, String spotifyId){
+    public List<UserArtist> syncUserArtist(User user){
         log.info("Initiating sync for {} top artists.", user.getUsername());
 
-        List<SpotifyArtist> spotifyArtists = fetchUserTopArtist(spotifyId);
+        List<SpotifyArtist> spotifyArtists = fetchUserTopArtist(user.getSpotifyId());
+        log.info("Successfully fetched spotify artists for user: {}", user.getUsername());
 
         List<UserArtist> userArtists = spotifyArtists
                 .stream()
                 .map(artist -> userArtistMapper.buildUserArtist(user, artist))
                 .toList();
 
+        userArtistCommandService.deleteByUser(user);
         return userArtistCommandService.saveUserArtists(userArtists);
     }
+
+
 
     @Retryable(
             retryFor = AuthorizationException.class,

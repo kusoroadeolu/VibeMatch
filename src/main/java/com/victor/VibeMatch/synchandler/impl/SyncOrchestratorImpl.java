@@ -42,12 +42,11 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     @Transactional
     @Override
     public LocalDateTime syncAllData(User user){
-        String spotifyId = user.getSpotifyId();
         log.info("Initiating user data sync");
 
-        CompletableFuture<Void> artistSync = runAsync(() -> userArtistSyncService.syncUserArtist(user, spotifyId));
-        CompletableFuture<Void> recentTrackSync = runAsync(() -> userTrackSyncService.syncRecentUserTracks(user, spotifyId));
-        CompletableFuture<Void> topTrackSync = runAsync(() -> userTrackSyncService.syncTopUserTracks(user, spotifyId));
+        CompletableFuture<Void> artistSync = runAsync(() -> userArtistSyncService.syncUserArtist(user));
+        CompletableFuture<Void> recentTrackSync = runAsync(() -> userTrackSyncService.syncRecentUserTracks(user));
+        CompletableFuture<Void> topTrackSync = runAsync(() -> userTrackSyncService.syncTopUserTracks(user));
         allOf(artistSync, recentTrackSync, topTrackSync).join();
 
         LocalDateTime syncedAt = LocalDateTime.now();
@@ -58,27 +57,28 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     //Checks if a user has synced previously
     public boolean hasSyncedRecently(LocalDateTime now, User user){
         LocalDateTime lastSyncedAt = user.getLastSyncedAt();
-        return lastSyncedAt != null && lastSyncedAt.plusHours(12).isAfter(now);
+        return lastSyncedAt != null && lastSyncedAt.isAfter(now.minusHours(12));
     }
 
     /**
      * Message producer which sends users to a queue to sync them
-     * @param spotifyId The spotify ID of the user
+     * @param user The user being synced
      * */
     @Override
-    public String scheduleUserSync(String spotifyId){
+    public String scheduleUserSync(User user){
         LocalDateTime now = LocalDateTime.now();
-        User user = userQueryService.findBySpotifyId(spotifyId);
+        String spotifyId = user.getSpotifyId();
+
         TaskStatus status = taskService.getTaskStatus(spotifyId);
 
-        if(status == PENDING || status == SUCCESS){
-            log.warn("User: {} sync is still in progress or has successfully completed", user.getUsername());
-            throw new UserSyncException(String.format("User: %s sync is still in progress or has successfully completed", user.getUsername()));
+        if(status == PENDING){
+            log.warn("User: {} sync is still in progress", user.getUsername());
+            return null;
         }
 
         if(hasSyncedRecently(now, user)){
             log.warn("User: {} has synced within the last 12 hours.", user.getUsername());
-            throw new UserSyncException(String.format("User: %s has synced within the last 12 hours.", user.getUsername()));
+            return null;
         }
 
         String taskId = UUID.randomUUID().toString();

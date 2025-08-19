@@ -6,5 +6,5 @@ import com.victor.VibeMatch.userartist.UserArtist;
 import java.util.List;
 
 public interface UserArtistSyncService {
-    public List<UserArtist> syncUserArtist(User user, String spotifyId);
+    public List<UserArtist> syncUserArtist(User user);
 }

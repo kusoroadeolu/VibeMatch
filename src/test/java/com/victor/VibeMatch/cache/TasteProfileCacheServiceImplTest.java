@@ -4,11 +4,8 @@ import com.victor.VibeMatch.tasteprofile.*;
 import com.victor.VibeMatch.tasteprofile.dto.ArtistDto;
 import com.victor.VibeMatch.tasteprofile.dto.GenreDto;
 import com.victor.VibeMatch.tasteprofile.dto.TasteProfileResponseDto;
-import com.victor.VibeMatch.user.User;
-import com.victor.VibeMatch.user.service.UserQueryServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
@@ -26,7 +23,7 @@ import static org.mockito.Mockito.*;
 class TasteProfileCacheServiceImplTest {
 
     @MockitoBean
-    private TasteProfileCreationService tasteProfileCreationService;
+    private TasteProfilePersistenceService tasteProfilePersistenceService;
 
     @MockitoBean
     private TasteProfileMapper tasteProfileMapper;
@@ -92,7 +89,7 @@ class TasteProfileCacheServiceImplTest {
     void getCachedProfile_shouldReturnProfileFromCache_onSecondCall() {
         //Arrange
         UUID mockId = UUID.randomUUID();
-        when(tasteProfileCreationService.createUserTasteProfile(mockId)).thenReturn(new TasteProfile());
+        when(tasteProfilePersistenceService.createUserTasteProfile(mockId)).thenReturn(new TasteProfile());
         when(tasteProfileMapper.responseDto(any(TasteProfile.class))).thenReturn(tasteProfile);
 
         //Assert

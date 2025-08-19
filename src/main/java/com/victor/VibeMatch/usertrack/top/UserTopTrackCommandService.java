@@ -7,5 +7,5 @@ import java.util.List;
 public interface UserTopTrackCommandService {
     List<UserTopTrack> saveTopTracks(List<UserTopTrack> tracks);
 
-    void deleteAllTopTracks(User user);
+    void deleteAllTopTracksByUser(User user);
 }

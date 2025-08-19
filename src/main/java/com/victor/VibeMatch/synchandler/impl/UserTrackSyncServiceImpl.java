@@ -39,32 +39,34 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
 
     /**
      * Sync User Recent Track Data
-     * @param spotifyId The spotifyId of the user
+     * @param user The user being synced
      * */
     @Override
-    public List<UserRecentTrack> syncRecentUserTracks(User user, String spotifyId){
+    public List<UserRecentTrack> syncRecentUserTracks(User user){
         log.info("Initiating sync for {} recent tracks.", user.getUsername());
 
 
-        List<SpotifyTrack> recentTracks = fetchTracks(spotifyId, buildRecentTrackDto());
+        List<SpotifyTrack> recentTracks = fetchTracks(user.getSpotifyId(), buildRecentTrackDto());
         log.info("Successfully fetched: {} recent tracks for user: {}", recentTracks.size(), user.getUsername());
 
         List<UserRecentTrack> userRecentTracks = recentTracks
                 .stream()
                 .map(recentTrack -> userTrackUtils.buildUserRecentTrack(recentTrack, user))
                 .toList();
+
+        userRecentTrackCommandService.deleteAllRecentTracksByUser(user);
         return userRecentTrackCommandService.saveRecentTracks(userRecentTracks);
     }
 
     /**
      * Sync User Top Track Data
-     * @param spotifyId The spotifyId of the user
+     * @param user The user being synced
      * */
     @Override
-    public List<UserTopTrack> syncTopUserTracks(User user, String spotifyId){
+    public List<UserTopTrack> syncTopUserTracks(User user){
         log.info("Initiating sync for {} top tracks.", user.getUsername());
 
-        List<SpotifyTrack> recentTracks = fetchTracks(spotifyId, buildTopTrackDto());
+        List<SpotifyTrack> recentTracks = fetchTracks(user.getSpotifyId(), buildTopTrackDto());
         log.info("Successfully fetched: {} top tracks for user: {}", recentTracks.size(), user.getUsername());
 
         List<UserTopTrack> userTopTracks = recentTracks
@@ -74,6 +76,7 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
 
         userTopTracks.forEach(userTopTrack -> System.out.println("TRACK NAME: " + userTopTrack.getName() + "\n"));
 
+        userTopTrackCommandService.deleteAllTopTracksByUser(user);
         return userTopTrackCommandService.saveTopTracks(userTopTracks);
     }
 

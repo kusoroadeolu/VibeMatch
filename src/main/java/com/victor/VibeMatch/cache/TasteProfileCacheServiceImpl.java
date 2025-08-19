@@ -1,7 +1,7 @@
 package com.victor.VibeMatch.cache;
 
 import com.victor.VibeMatch.tasteprofile.TasteProfile;
-import com.victor.VibeMatch.tasteprofile.TasteProfileCreationService;
+import com.victor.VibeMatch.tasteprofile.TasteProfilePersistenceService;
 import com.victor.VibeMatch.tasteprofile.TasteProfileMapper;
 import com.victor.VibeMatch.tasteprofile.dto.TasteProfileResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TasteProfileCacheServiceImpl implements TasteProfileCacheService {
 
-    private final TasteProfileCreationService tasteProfileCreationService;
+    private final TasteProfilePersistenceService tasteProfilePersistenceService;
     private final TasteProfileMapper tasteProfileMapper;
 
     @CachePut(key = "#userId", cacheNames = "tasteProfileCache")
@@ -30,7 +30,7 @@ public class TasteProfileCacheServiceImpl implements TasteProfileCacheService {
     @Cacheable(key = "#userId", cacheNames = "tasteProfileCache")
     @Override
     public TasteProfileResponseDto getCachedProfile(String userId){
-        TasteProfile profile = tasteProfileCreationService.createUserTasteProfile(UUID.fromString(userId));
+        TasteProfile profile = tasteProfilePersistenceService.createUserTasteProfile(UUID.fromString(userId));
         return tasteProfileMapper.responseDto(profile);
     }
 

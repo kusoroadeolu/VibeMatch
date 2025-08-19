@@ -1,7 +1,7 @@
 package com.victor.VibeMatch.tasteprofile;
 
 import com.victor.VibeMatch.tasteprofile.embeddables.TasteWrapper;
-import com.victor.VibeMatch.tasteprofile.impl.TasteProfileCreationServiceImpl;
+import com.victor.VibeMatch.tasteprofile.impl.TasteProfilePersistenceServiceImpl;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TasteProfileCreationServiceImplTest {
+class TasteProfilePersistenceServiceImplTest {
 
     @Mock
     private TasteProfileCalculationService tasteProfileCalculationService;
@@ -30,7 +30,7 @@ class TasteProfileCreationServiceImplTest {
     private UserQueryService userQueryService;
 
     @InjectMocks
-    private TasteProfileCreationServiceImpl tasteProfileCreationService;
+    private TasteProfilePersistenceServiceImpl tasteProfileCreationService;
 
     private TasteProfile tasteProfile;
 

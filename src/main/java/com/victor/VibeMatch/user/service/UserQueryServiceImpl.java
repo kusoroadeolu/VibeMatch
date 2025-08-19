@@ -1,7 +1,6 @@
 package com.victor.VibeMatch.user.service;
 
 import com.victor.VibeMatch.exceptions.NoSuchUserException;
-import com.victor.VibeMatch.exceptions.TasteProfileSaveException;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.UserRepository;
 import com.victor.VibeMatch.user.UserResponseDto;
@@ -9,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -59,6 +60,20 @@ public class UserQueryServiceImpl implements UserQueryService{
         return userRepository
                 .findBySpotifyId(spotifyId)
                 .orElseThrow(() -> new NoSuchUserException(String.format("Failed to find user with spotify ID: %s in the DB", spotifyId)));
+    }
+
+    @Override
+    public List<User> findAllUsers(){
+        List<User> users = userRepository.findAll();
+        log.info("Found {} users", users.size());
+        return users;
+    }
+
+    @Override
+    public List<User> findByLastSyncedAtBefore(LocalDateTime then) {
+        List<User> users = userRepository.findByLastSyncedAtBefore(then);
+        log.info("Found {} users who haven't been synced for 24 hours", users.size());
+        return users;
     }
 
     @Override

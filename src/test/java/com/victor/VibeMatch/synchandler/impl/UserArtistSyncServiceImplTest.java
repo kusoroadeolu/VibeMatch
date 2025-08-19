@@ -70,6 +70,7 @@ class UserArtistSyncServiceImplTest {
         user = new User();
         user.setId(UUID.randomUUID());
         spotifyId = "test-spotify-id";
+        user.setSpotifyId(spotifyId);
         accessToken = "mock-access-token";
 
         // Use the new TokenDto structure
@@ -102,11 +103,10 @@ class UserArtistSyncServiceImplTest {
         when(userArtistCommandService.saveUserArtists(any())).thenReturn(userArtists);
 
         // Act
-        List<UserArtist> result = userArtistSyncService.syncUserArtist(user, spotifyId);
+        List<UserArtist> result = userArtistSyncService.syncUserArtist(user);
 
         // Assert
         assertEquals(userArtists, result);
-
         verify(tokenCacheService, times(1)).getCachedToken(spotifyId);
         verify(tokenRefreshService, never()).refreshUserAccessToken(any());
 
@@ -115,6 +115,7 @@ class UserArtistSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(accessToken)
         );
+        verify(userArtistCommandService, times(1)).deleteByUser(user);
         verify(userArtistCommandService, times(1)).saveUserArtists(any());
     }
 
@@ -141,7 +142,7 @@ class UserArtistSyncServiceImplTest {
         when(userArtistCommandService.saveUserArtists(any())).thenReturn(userArtists);
 
         // Act
-        List<UserArtist> result = userArtistSyncService.syncUserArtist(user, spotifyId);
+        List<UserArtist> result = userArtistSyncService.syncUserArtist(user);
 
         // Assert
         assertEquals(userArtists, result);

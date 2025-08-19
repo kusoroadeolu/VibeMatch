@@ -83,6 +83,11 @@ jwt:
   secret: 833ca894019d51c760adeb6d10ecfa8d1e6d30ccc12301e6b163be23aa21adb8
   expiration: 86400
 
+scheduled:
+  refresh-user-data: 7200000
+  threshold-in-hours: 24
+  compatibility-cron: 0 0 3 * * *
+
 
 
 

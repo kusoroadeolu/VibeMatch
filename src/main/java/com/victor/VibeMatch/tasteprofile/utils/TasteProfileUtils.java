@@ -1,5 +1,6 @@
 package com.victor.VibeMatch.tasteprofile.utils;
 
+import com.victor.VibeMatch.math.MathUtils;
 import com.victor.VibeMatch.userartist.UserArtist;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrack;
 import com.victor.VibeMatch.usertrack.top.UserTopTrack;
@@ -52,7 +53,6 @@ public class TasteProfileUtils {
             int value = entry.getValue();
             String key = entry.getKey();
 
-            //Just add the top 3 elements to the map
             if(count < 3){
                 mapTopGenres.put(key, value);
                 count++;
@@ -108,6 +108,7 @@ public class TasteProfileUtils {
 
         double discoveryRate = mathUtils.calculateJaccardSimilarity(topTrackArtistIds, recentTrackArtistIds);
         log.info("Discovery rate: {}", discoveryRate);
+
         return discoveryRate;
     }
 

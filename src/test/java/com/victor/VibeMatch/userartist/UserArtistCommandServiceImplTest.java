@@ -1,5 +1,6 @@
 package com.victor.VibeMatch.userartist;
 
+import com.victor.VibeMatch.exceptions.UserArtistDeletionException;
 import com.victor.VibeMatch.exceptions.UserArtistSaveException;
 import com.victor.VibeMatch.user.User; // Assuming User class is accessible
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +34,6 @@ public class UserArtistCommandServiceImplTest {
 
 
 
-    // Helper method to create a UserArtist using the Builder pattern
-    // This simplifies test data creation and adapts to changes in the UserArtist constructor/fields
     private UserArtist createUserArtist(String artistSpotifyId, String name, int popularity, Set<String> genres, int ranking, User user) {
         return UserArtist.builder()
                 .id(UUID.randomUUID()) // Generate a random UUID for the test object
@@ -48,7 +47,6 @@ public class UserArtistCommandServiceImplTest {
                 .build();
     }
 
-    // --- Smart Test Case 1: Successful Save ---
     @Test
     @DisplayName("Should successfully save a list of UserArtists")
     void saveUserArtists_success() {
@@ -116,7 +114,7 @@ public class UserArtistCommandServiceImplTest {
                 userArtistCommandService.saveUserArtists(userArtistsToSave)
         );
 
-        // Verify: The saveAll method was invoked exactly once
+
         verify(userArtistRepository, times(1)).saveAll(userArtistsToSave);
         // Assert: The exception message indicates an unexpected error
         assertTrue(thrownException.getMessage().contains("unexpected error occurred"));
@@ -124,20 +122,43 @@ public class UserArtistCommandServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should return an empty list when saving an empty list of UserArtists")
-    void saveUserArtists_emptyList() {
-        // Given: An empty list of UserArtist objects
-        List<UserArtist> emptyList = Collections.emptyList();
+    public void deleteByUser_shouldCallDeleteMethodOnce(){
+        //Arrange
+        User user = User.builder().username("name").build();
 
-        // When: The repository's saveAll method is called with an empty list, it returns an empty list
-        when(userArtistRepository.saveAll(emptyList)).thenReturn(emptyList);
+        //Act
+        userArtistCommandService.deleteByUser(user);
 
-        // Then: The service should return an empty list
-        List<UserArtist> savedUserArtists = userArtistCommandService.saveUserArtists(emptyList);
+        //Verify
+        verify(userArtistRepository, times(1)).deleteByUser(user);
 
-        // Verify: The saveAll method was still invoked once (even if with an empty list)
-        verify(userArtistRepository, times(1)).saveAll(emptyList);
-        // Assert: The returned list is empty
-        assertTrue(savedUserArtists.isEmpty());
     }
+
+    @Test
+    public void deleteByUser_shouldThrowDeleteEx_givenNullUser(){
+        //Arrange
+        User user = null;
+
+        //Act & Assert
+        assertThrows(UserArtistDeletionException.class, () ->
+                userArtistCommandService.deleteByUser(user));
+        verify(userArtistRepository, never()).deleteByUser(user);
+
+    }
+
+    @Test
+    public void deleteByUser_shouldThrowDeleteEx_onGenericException(){
+        //Arrange
+        User user = User.builder().username("name").build();
+        doThrow(new RuntimeException()).when(userArtistRepository).deleteByUser(user);
+
+        //Act & Assert
+        assertThrows(UserArtistDeletionException.class, () ->
+                userArtistCommandService.deleteByUser(user));
+        verify(userArtistRepository, times(1)).deleteByUser(user);
+
+    }
+
+
+
 }

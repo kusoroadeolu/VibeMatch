@@ -118,42 +118,42 @@ class UserTopTrackCommandServiceImplTest {
 
 
     @Test
-    void deleteAllTopTracks_shouldDeleteSuccessfully() {
+    void deleteAllTopTracks_shouldDeleteSuccessfullyByUser() {
         // Arrange
         when(userTopTrackRepository.deleteByUser(testUser)).thenReturn(2);
 
         // Act
-        userTopTrackCommandService.deleteAllTopTracks(testUser);
+        userTopTrackCommandService.deleteAllTopTracksByUser(testUser);
 
         // Assert
         verify(userTopTrackRepository, times(1)).deleteByUser(testUser);
     }
 
     @Test
-    void deleteAllTopTracks_shouldHandleNoTracksFound() {
+    void deleteAllTopTracks_shouldHandleNoTracksByUserFound() {
         // Arrange
         when(userTopTrackRepository.deleteByUser(testUser)).thenReturn(0);
 
         // Act
-        userTopTrackCommandService.deleteAllTopTracks(testUser);
+        userTopTrackCommandService.deleteAllTopTracksByUser(testUser);
 
         // Assert
         verify(userTopTrackRepository, times(1)).deleteByUser(testUser);
     }
 
     @Test
-    void deleteAllTopTracks_shouldThrowExceptionOnNullUser() {
+    void deleteAllTopTracks_ByUser_shouldThrowExceptionOnNullUser() {
         // Act & Assert
-        assertThrows(NoSuchUserException.class, () -> userTopTrackCommandService.deleteAllTopTracks(null));
+        assertThrows(NoSuchUserException.class, () -> userTopTrackCommandService.deleteAllTopTracksByUser(null));
         verify(userTopTrackRepository, never()).deleteByUser(any());
     }
 
     @Test
-    void deleteAllTopTracks_shouldThrowExceptionOnRepositoryError() {
+    void deleteAllTopTracks_ByUser_shouldThrowExceptionOnRepositoryError() {
         // Arrange
         doThrow(new RuntimeException("Database error")).when(userTopTrackRepository).deleteByUser(testUser);
 
         // Act & Assert
-        assertThrows(UserTrackDeletionException.class, () -> userTopTrackCommandService.deleteAllTopTracks(testUser));
+        assertThrows(UserTrackDeletionException.class, () -> userTopTrackCommandService.deleteAllTopTracksByUser(testUser));
     }
 }

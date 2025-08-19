@@ -1,6 +1,6 @@
 package com.victor.VibeMatch.tasteprofile;
 
-import com.victor.VibeMatch.tasteprofile.utils.MathUtils;
+import com.victor.VibeMatch.math.MathUtils;
 import com.victor.VibeMatch.tasteprofile.utils.TasteProfileUtils;
 import com.victor.VibeMatch.userartist.UserArtist;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrack;

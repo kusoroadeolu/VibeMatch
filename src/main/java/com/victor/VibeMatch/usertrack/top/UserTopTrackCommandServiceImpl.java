@@ -43,7 +43,7 @@ public class UserTopTrackCommandServiceImpl implements UserTopTrackCommandServic
     }
 
     @Override
-    public void deleteAllTopTracks(User user) {
+    public void deleteAllTopTracksByUser(User user) {
         if (user == null) {
             log.warn("Attempted to delete tracks with null user");
             throw new NoSuchUserException("User cannot be null");

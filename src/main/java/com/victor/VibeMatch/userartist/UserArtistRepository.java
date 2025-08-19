@@ -13,4 +13,6 @@ public interface UserArtistRepository extends JpaRepository<UserArtist, UUID> {
     List<UserArtist> findByUser(User user);
 
     List<UserArtist> findByUserOrderByRankingAsc(User user, Limit limit);
+
+    void deleteByUser(User user);
 }

@@ -1,6 +1,5 @@
-package com.victor.VibeMatch.tasteprofile;
+package com.victor.VibeMatch.math;
 
-import com.victor.VibeMatch.tasteprofile.utils.MathUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -78,4 +77,64 @@ class MathUtilsTest {
         assertEquals(expected, mainstreamScore);
     }
 
+    @Test
+    public void shouldCalculateUserArtistWeightedVector(){
+        //Arrange
+        int rank = 1;
+        int maxRank = 25;
+        int popularity = 45;
+        double expected = 30.0d;
+
+        //Act
+        double weightedVector = mathUtils.calculateUserArtistWeightedVector(rank, maxRank, popularity);
+
+        //Assert
+        assertEquals(expected, weightedVector);
+    }
+
+    @Test
+    public void shouldCalculateUserArtistWeightedVectorPopularitySkewed(){
+        //Arrange
+        int rank = 3;
+        int maxRank = 25;
+        int popularity = 70;
+        double expected = 51.2d;
+
+        //Act
+        double weightedVector = mathUtils.calculateUserArtistWeightedVectorPopularitySkewed(rank, maxRank, popularity);
+
+        //Assert
+        assertEquals(expected, weightedVector);
+    }
+
+    @Test
+    public void shouldInvertRanks(){
+        //Arrange
+        int rank = 1;
+        int maxRank = 25;
+        int expected = 25;
+
+        //Act
+        double inverted = mathUtils.invertRank(rank, maxRank);
+
+        //Assert
+        assertEquals(expected, inverted);
+
+    }
+
+    @Test
+    public void shouldCalculateCosineSimilarity(){
+
+        //Arrange
+        List<Double> weights1 = List.of(19.99, 5.50, 42.00, 0.0);
+        List<Double> weights2 = List.of(1.5, 2.3, 0.8, 1.1);
+        double expectedSimilarity = 0.5311511590069463;
+
+        //Act
+        double cosineSimilarity = mathUtils.calculateCosineSimilarity(weights1, weights2);
+
+        //Assert
+        assertEquals(expectedSimilarity, cosineSimilarity);
+
+    }
 }

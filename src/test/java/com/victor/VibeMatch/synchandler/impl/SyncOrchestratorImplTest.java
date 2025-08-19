@@ -71,25 +71,25 @@ class SyncOrchestratorImplTest {
 
         //Assert
         assertNotNull(syncedAt);
-        verify(userArtistSyncService, times(1)).syncUserArtist(user, spotifyId);
-        verify(userTrackSyncService, times(1)).syncRecentUserTracks(user, spotifyId);
-        verify(userTrackSyncService, times(1)).syncTopUserTracks(user, spotifyId);
+        verify(userArtistSyncService, times(1)).syncUserArtist(user);
+        verify(userTrackSyncService, times(1)).syncRecentUserTracks(user);
+        verify(userTrackSyncService, times(1)).syncTopUserTracks(user);
     }
 
     @Test
     public void shouldScheduleUserSync(){
         //Arrange
         String spotifyId = "spotify_id";
+        user.setSpotifyId(spotifyId);
         TaskStatus status = TaskStatus.PENDING;
 
-        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
         when(taskService.getTaskStatus(spotifyId)).thenReturn(null);
         when(rabbitSyncConfigProperties.getExchangeName()).thenReturn("sync_exchange");
         when(rabbitSyncConfigProperties.getRoutingKey()).thenReturn("sync_key");
 
 
         //Act
-        String mockTaskId = syncOrchestrator.scheduleUserSync(spotifyId);
+        String mockTaskId = syncOrchestrator.scheduleUserSync(user);
 
         //Assert
         assertNotNull(mockTaskId);
@@ -103,49 +103,32 @@ class SyncOrchestratorImplTest {
     }
 
     @Test
-    public void scheduleUserSync_shouldThrowUserSyncException_givenPendingStatus(){
+    public void scheduleUserSync_shouldReturnNull_givenPendingStatus(){
         //Arrange
         String spotifyId = "spotify_id";
+        user.setSpotifyId(spotifyId);
 
-        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
         when(taskService.getTaskStatus(spotifyId)).thenReturn(TaskStatus.PENDING);
 
 
         //Act
-        assertThrows(UserSyncException.class, () -> {
-            syncOrchestrator.scheduleUserSync(spotifyId);
-        });
+        var id = syncOrchestrator.scheduleUserSync(user);
+        assertNull(id);
+
     }
 
     @Test
-    public void scheduleUserSync_shouldThrowUserSyncException_givenSuccessStatus(){
-        //Arrange
-        String spotifyId = "spotify_id";
-
-        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
-        when(taskService.getTaskStatus(spotifyId)).thenReturn(TaskStatus.PENDING);
-
-
-        //Act
-        assertThrows(UserSyncException.class, () -> {
-            syncOrchestrator.scheduleUserSync(spotifyId);
-        });
-    }
-
-    @Test
-    public void scheduleUserSync_shouldThrowUserSyncException_ifUserHasSyncedRecently(){
+    public void scheduleUserSync_shouldReturnNull_ifUserHasSyncedRecently(){
         //Arrange
         String spotifyId = "spotify_id";
         user.setLastSyncedAt(LocalDateTime.now());
+        user.setSpotifyId(spotifyId);
 
-        when(userQueryService.findBySpotifyId(spotifyId)).thenReturn(user);
         when(taskService.getTaskStatus(spotifyId)).thenReturn(null);
 
+        var id = syncOrchestrator.scheduleUserSync(user);
+        assertNull(id);
 
-        //Act
-        assertThrows(UserSyncException.class, () -> {
-            syncOrchestrator.scheduleUserSync(spotifyId);
-        });
     }
 
     @Test

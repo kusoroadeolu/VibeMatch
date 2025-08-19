@@ -15,17 +15,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TasteProfileCalculationServiceImpl implements TasteProfileCalculationService {
 
-    private final UserTopTrackQueryService userTopTrackQueryService;
-    private final UserRecentTrackQueryService userRecentTrackQueryService;
     private final TasteWrapperUtils tasteWrapperUtils;
     private final UserArtistQueryService userArtistQueryService;
     private final TasteProfileUtils tasteProfileUtils;
@@ -37,7 +33,13 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
      * */
     @Override
     public List<TasteWrapper> calculateTopGenres(User user){
-        List<UserArtist> artists = userArtistQueryService.findArtistsByUser(user);
+        List<UserArtist> artists = user.getUserArtists();
+
+        if(artists == null || artists.isEmpty()){
+            log.info("User artist list is null or empty. Returning empty list");
+            return Collections.emptyList();
+        }
+
         long totalGenreCount = tasteProfileUtils.getAllGenres(artists).size();
         log.info("Total Genre Count: {}", totalGenreCount);
 
@@ -65,7 +67,8 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
     public List<TasteWrapper> calculateTopArtists(User user){
         int limit = 3;
         List<UserArtist> artists = userArtistQueryService.findArtistsByUserOrderByRanking(user, limit);
-        log.info("Found top {} artists for user: {}", artists.size(), user);
+
+        log.info("Found top {} artists for user: {}", artists.size(), user.getUsername());
 
         List<TasteWrapper> tasteWrappers = new ArrayList<>();
 
@@ -86,9 +89,9 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
      * */
     @Override
     public double calculateMainStreamScore(User user){
-        List<UserArtist> artists = userArtistQueryService.findArtistsByUser(user);
-        List<UserTopTrack> topTracks = userTopTrackQueryService.findByUser(user);
-        List<UserRecentTrack> recentTracks = userRecentTrackQueryService.findByUser(user);
+        List<UserArtist> artists = user.getUserArtists();
+        List<UserTopTrack> topTracks = user.getUserTopTracks();
+        List<UserRecentTrack> recentTracks = user.getUserRecentTracks();
 
         double artistPopularityAvg = tasteProfileUtils.calculateArtistPopularityAvg(artists)/100;
         double topTrackPopularityAvg = tasteProfileUtils.calculateTopTrackPopularityAvg(topTracks)/100;
@@ -107,8 +110,8 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
      * */
     @Override
     public double calculateDiscoveryPattern(User user){
-        List<UserTopTrack> topTracks = userTopTrackQueryService.findByUser(user);
-        List<UserRecentTrack> recentTracks = userRecentTrackQueryService.findByUser(user);
+        List<UserTopTrack> topTracks = user.getUserTopTracks();
+        List<UserRecentTrack> recentTracks = user.getUserRecentTracks();
 
         double overlap = tasteProfileUtils.calculateDiscoveryRate(topTracks, recentTracks);
         log.info("Overlap: {} for user: {}", overlap, user.getUsername());
@@ -118,4 +121,6 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
 
         return discoveryRate;
     }
+
+
 }

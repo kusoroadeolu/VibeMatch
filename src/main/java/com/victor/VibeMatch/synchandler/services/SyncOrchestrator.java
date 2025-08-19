@@ -10,7 +10,7 @@ public interface SyncOrchestrator {
     @Transactional
     LocalDateTime syncAllData(User user);
 
-    String scheduleUserSync(String spotifyId);
+    String scheduleUserSync(User user);
 
     TaskStatus getSyncStatus(String taskId);
 }

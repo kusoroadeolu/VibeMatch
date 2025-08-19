@@ -1,5 +1,6 @@
 package com.victor.VibeMatch.user;
 
+import com.victor.VibeMatch.compatibility.CompatibilityScore;
 import com.victor.VibeMatch.security.Role;
 import com.victor.VibeMatch.tasteprofile.TasteProfile;
 import com.victor.VibeMatch.userartist.UserArtist;
@@ -49,7 +50,7 @@ public class User {
     @Column(nullable = false)
     private String country;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     @ColumnDefault("true")
     private boolean isPublic;
 
@@ -64,6 +65,10 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private TasteProfile tasteProfile;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompatibilityScore> compatibilityScore;
+
 
     @PrePersist
     public void onCreate(){

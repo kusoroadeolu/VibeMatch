@@ -67,8 +67,9 @@ class UserTrackSyncServiceImplTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setId(UUID.randomUUID());
         spotifyId = "test-spotify-id";
+        user.setId(UUID.randomUUID());
+        user.setSpotifyId(spotifyId);
         accessToken = "mock-access-token";
         invalidTokenDto = new TokenDto(null, "Bearer", LocalDateTime.now(), 3600, "new-refresh-token", "scope");
         cachedTokenDto = new TokenDto(accessToken, "Bearer", LocalDateTime.now(), 3600, "refresh-token", "scope");
@@ -97,7 +98,7 @@ class UserTrackSyncServiceImplTest {
         when(userRecentTrackCommandService.saveRecentTracks(any())).thenReturn(userRecentTracks);
 
         // Act
-        List<UserRecentTrack> result = userTrackSyncService.syncRecentUserTracks(user, spotifyId);
+        List<UserRecentTrack> result = userTrackSyncService.syncRecentUserTracks(user);
 
         // Assert
         assertEquals(userRecentTracks, result);
@@ -107,6 +108,7 @@ class UserTrackSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(accessToken)
         );
+        verify(userRecentTrackCommandService, times(1)).deleteAllRecentTracksByUser(user);
         verify(userRecentTrackCommandService, times(1)).saveRecentTracks(any());
     }
 
@@ -125,7 +127,7 @@ class UserTrackSyncServiceImplTest {
         when(userTopTrackCommandService.saveTopTracks(any())).thenReturn(userTopTracks);
 
         // Act
-        List<UserTopTrack> result = userTrackSyncService.syncTopUserTracks(user, spotifyId);
+        List<UserTopTrack> result = userTrackSyncService.syncTopUserTracks(user);
 
         // Assert
         assertEquals(userTopTracks, result);
@@ -135,6 +137,7 @@ class UserTrackSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(accessToken)
         );
+        verify(userTopTrackCommandService, times(1)).deleteAllTopTracksByUser(user);
         verify(userTopTrackCommandService, times(1)).saveTopTracks(any());
     }
 
@@ -157,7 +160,7 @@ class UserTrackSyncServiceImplTest {
         when(userRecentTrackCommandService.saveRecentTracks(any())).thenReturn(userRecentTracks);
 
         // Act
-        List<UserRecentTrack> result = userTrackSyncService.syncRecentUserTracks(user, spotifyId);
+        List<UserRecentTrack> result = userTrackSyncService.syncRecentUserTracks(user);
 
         // Assert
         assertEquals(userRecentTracks, result);

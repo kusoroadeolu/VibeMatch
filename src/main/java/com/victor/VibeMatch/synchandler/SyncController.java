@@ -2,6 +2,8 @@ package com.victor.VibeMatch.synchandler;
 
 import com.victor.VibeMatch.security.UserPrincipal;
 import com.victor.VibeMatch.synchandler.services.SyncOrchestrator;
+import com.victor.VibeMatch.user.User;
+import com.victor.VibeMatch.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,14 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/sync")
 public class SyncController {
     private final SyncOrchestrator syncOrchestrator;
+    private final UserQueryService userQueryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> syncUserData(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String spotifyId = userPrincipal.getSpotifyId();
+        User user = userQueryService.findBySpotifyId(spotifyId);
         log.info("Spotify ID: {}", spotifyId);
-        String taskId = syncOrchestrator.scheduleUserSync(spotifyId);
+        String taskId = syncOrchestrator.scheduleUserSync(user);
         return new ResponseEntity<>(taskId, HttpStatus.ACCEPTED);
     }
 

@@ -3,7 +3,7 @@ package com.victor.VibeMatch.tasteprofile.impl;
 import com.victor.VibeMatch.tasteprofile.TasteProfile;
 import com.victor.VibeMatch.tasteprofile.TasteProfileCalculationService;
 import com.victor.VibeMatch.tasteprofile.TasteProfileCommandService;
-import com.victor.VibeMatch.tasteprofile.TasteProfileCreationService;
+import com.victor.VibeMatch.tasteprofile.TasteProfilePersistenceService;
 import com.victor.VibeMatch.tasteprofile.embeddables.TasteWrapper;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TasteProfileCreationServiceImpl implements TasteProfileCreationService {
+public class TasteProfilePersistenceServiceImpl implements TasteProfilePersistenceService {
     private final TasteProfileCalculationService tasteProfileCalculationService;
     private final TasteProfileCommandService tasteProfileCommandService;
     private final UserQueryService userQueryService;
