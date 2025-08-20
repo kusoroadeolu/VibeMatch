@@ -119,9 +119,6 @@ class UserTopTrackCommandServiceImplTest {
 
     @Test
     void deleteAllTopTracks_shouldDeleteSuccessfullyByUser() {
-        // Arrange
-        when(userTopTrackRepository.deleteByUser(testUser)).thenReturn(2);
-
         // Act
         userTopTrackCommandService.deleteAllTopTracksByUser(testUser);
 
@@ -131,8 +128,7 @@ class UserTopTrackCommandServiceImplTest {
 
     @Test
     void deleteAllTopTracks_shouldHandleNoTracksByUserFound() {
-        // Arrange
-        when(userTopTrackRepository.deleteByUser(testUser)).thenReturn(0);
+
 
         // Act
         userTopTrackCommandService.deleteAllTopTracksByUser(testUser);
@@ -144,7 +140,7 @@ class UserTopTrackCommandServiceImplTest {
     @Test
     void deleteAllTopTracks_ByUser_shouldThrowExceptionOnNullUser() {
         // Act & Assert
-        assertThrows(NoSuchUserException.class, () -> userTopTrackCommandService.deleteAllTopTracksByUser(null));
+        assertThrows(UserTrackDeletionException.class, () -> userTopTrackCommandService.deleteAllTopTracksByUser(null));
         verify(userTopTrackRepository, never()).deleteByUser(any());
     }
 
@@ -156,4 +152,6 @@ class UserTopTrackCommandServiceImplTest {
         // Act & Assert
         assertThrows(UserTrackDeletionException.class, () -> userTopTrackCommandService.deleteAllTopTracksByUser(testUser));
     }
+
+
 }

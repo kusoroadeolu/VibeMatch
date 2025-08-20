@@ -17,4 +17,9 @@ public class UserTopTrackQueryServiceImpl implements UserTopTrackQueryService{
     public List<UserTopTrack> findByUser(User user){
         return userTopTrackRepository.findByUser(user);
     }
+
+    @Override
+    public boolean existsByUser(User user){
+        return userTopTrackRepository.existsByUser(user);
+    }
 }

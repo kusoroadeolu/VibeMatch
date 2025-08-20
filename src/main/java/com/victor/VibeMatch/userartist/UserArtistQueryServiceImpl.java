@@ -32,4 +32,9 @@ public class UserArtistQueryServiceImpl implements UserArtistQueryService{
         return artists;
     }
 
+    @Override
+    public boolean existsByUser(User user){
+        return userArtistRepository.existsByUser(user);
+    }
+
 }

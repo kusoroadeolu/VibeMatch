@@ -12,6 +12,7 @@ import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.userartist.UserArtist;
 import com.victor.VibeMatch.userartist.UserArtistCommandService;
 import com.victor.VibeMatch.userartist.UserArtistCommandServiceImpl;
+import com.victor.VibeMatch.userartist.UserArtistQueryService;
 import com.victor.VibeMatch.userartist.mapper.UserArtistMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class UserArtistSyncServiceImpl<T> implements UserArtistSyncService {
     private final SpotifyConfigProperties configProperties;
     private final UserArtistMapper userArtistMapper;
     private final UserArtistCommandService userArtistCommandService;
+    private final UserArtistQueryService userArtistQueryService;
     private final SpotifyDataOrchestratorService<T> orchestratorService;
 
     /**
@@ -52,7 +54,10 @@ public class UserArtistSyncServiceImpl<T> implements UserArtistSyncService {
                 .map(artist -> userArtistMapper.buildUserArtist(user, artist))
                 .toList();
 
-        userArtistCommandService.deleteByUser(user);
+        if(userArtistQueryService.existsByUser(user)){
+            userArtistCommandService.deleteByUser(user);
+        }
+
         return userArtistCommandService.saveUserArtists(userArtists);
     }
 

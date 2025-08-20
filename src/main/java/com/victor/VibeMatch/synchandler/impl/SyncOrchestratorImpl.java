@@ -1,8 +1,8 @@
 package com.victor.VibeMatch.synchandler.impl;
 
-import com.victor.VibeMatch.synchandler.TaskStatus;
 import com.victor.VibeMatch.exceptions.UserSyncException;
 import com.victor.VibeMatch.rabbitmq.RabbitSyncConfigProperties;
+import com.victor.VibeMatch.synchandler.TaskStatus;
 import com.victor.VibeMatch.synchandler.services.SyncOrchestrator;
 import com.victor.VibeMatch.synchandler.services.TaskService;
 import com.victor.VibeMatch.synchandler.services.UserArtistSyncService;
@@ -19,8 +19,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static com.victor.VibeMatch.synchandler.TaskStatus.*;
-import static java.util.concurrent.CompletableFuture.*;
+import static com.victor.VibeMatch.synchandler.TaskStatus.PENDING;
+import static java.util.concurrent.CompletableFuture.allOf;
+import static java.util.concurrent.CompletableFuture.runAsync;
 
 
 @Service
@@ -32,7 +33,6 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     private final RabbitTemplate rabbitTemplate;
     private final RabbitSyncConfigProperties rabbitSyncConfigProperties;
     private final TaskService taskService;
-    private final UserQueryService userQueryService;
 
     /**
      * Syncs all user top tracks and artists
@@ -43,11 +43,15 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     @Override
     public LocalDateTime syncAllData(User user){
         log.info("Initiating user data sync");
-
-        CompletableFuture<Void> artistSync = runAsync(() -> userArtistSyncService.syncUserArtist(user));
-        CompletableFuture<Void> recentTrackSync = runAsync(() -> userTrackSyncService.syncRecentUserTracks(user));
-        CompletableFuture<Void> topTrackSync = runAsync(() -> userTrackSyncService.syncTopUserTracks(user));
-        allOf(artistSync, recentTrackSync, topTrackSync).join();
+        try{
+            CompletableFuture<Void> artistSync = runAsync(() -> userArtistSyncService.syncUserArtist(user));
+            CompletableFuture<Void> recentTrackSync = runAsync(() -> userTrackSyncService.syncRecentUserTracks(user));
+            CompletableFuture<Void> topTrackSync = runAsync(() -> userTrackSyncService.syncTopUserTracks(user));
+            allOf(artistSync, recentTrackSync, topTrackSync).join();
+        }catch (Exception e){
+            log.info("An unexpected error occurred while trying to sync data for  user: {}", user.getUsername());
+            throw new UserSyncException(String.format("An unexpected error occurred while trying to sync data for  user: %s", user.getUsername()));
+        }
 
         LocalDateTime syncedAt = LocalDateTime.now();
         log.info("All sync operations completed for user: {} at: {}", user.getUsername(), syncedAt);
@@ -101,6 +105,10 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
 
     }
 
+
+    /**
+     * Gets the sync status for an ongoing sync
+     * */
     @Override
     public TaskStatus getSyncStatus(String taskId){
         if(taskId == null || taskId.isEmpty()){

@@ -1,21 +1,19 @@
 package com.victor.VibeMatch.compatibility.impl;
 
-import com.victor.VibeMatch.compatibility.CompatibilityScore;
-import com.victor.VibeMatch.compatibility.CompatibilityScoreMapper;
+import com.victor.VibeMatch.compatibility.*;
 import com.victor.VibeMatch.compatibility.dtos.ArtistCompatibilityDto;
 import com.victor.VibeMatch.compatibility.dtos.CompatibilityScoreResponseDto;
 import com.victor.VibeMatch.compatibility.dtos.CompatibilityUserDto;
 import com.victor.VibeMatch.compatibility.dtos.GenreCompatibilityDto;
 import com.victor.VibeMatch.compatibility.embeddables.CompatibilityKey;
 import com.victor.VibeMatch.compatibility.embeddables.CompatibilityWrapper;
+import com.victor.VibeMatch.exceptions.UserPrivacyException;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -24,8 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -33,15 +30,18 @@ import static org.mockito.Mockito.*;
 class CompatibilityScorePersistenceServiceImplTest {
 
     @Mock
-    private CompatibilityScoreCreationServiceImpl compatibilityScoreCreationService;
+    private CompatibilityScoreCreationService compatibilityScoreCreationService;
     @Mock
-    private CompatibilityScoreCommandServiceImpl compatibilityScoreCommandService;
+    private CompatibilityScoreCommandService compatibilityScoreCommandService;
+    @Mock
+    private CompatibilityScoreQueryService compatibilityScoreQueryService;
     @Mock
     private UserQueryService userQueryService;
     @Mock
     private CompatibilityScoreMapper compatibilityScoreMapper;
 
     @InjectMocks
+    @Spy
     private CompatibilityScorePersistenceServiceImpl compatibilityPersistenceService;
 
     private User user;
@@ -58,15 +58,12 @@ class CompatibilityScorePersistenceServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize user IDs
         userId = UUID.fromString("c1c1c1c1-c1c1-c1c1-c1c1-c1c1c1c1c1c1");
         targetUserId = UUID.fromString("d2d2d2d2-d2d2-d2d2-d2d2-d2d2d2d2d2d2");
 
-        // Initialize mock User objects
         user = User.builder().id(userId).username("TestUser").build();
         targetUser = User.builder().id(targetUserId).username("TargetUser").isPublic(true).build();
 
-        // Initialize mock data returned by CompatibilityScoreCreationServiceImpl
         mockSharedArtists = Collections.singletonList(
                 CompatibilityWrapper.builder().name("Artist X").your(5.0).their(10.0).build()
         );
@@ -81,7 +78,6 @@ class CompatibilityScorePersistenceServiceImplTest {
                 "You have very similar music discovery patterns."
         );
 
-        // Initialize mock CompatibilityScore entity that would be built/saved
         mockCompatibilityScoreEntity = CompatibilityScore.builder()
                 .key(CompatibilityKey.builder().userId(userId).targetUserId(targetUserId).build())
                 .user(user)
@@ -91,10 +87,9 @@ class CompatibilityScorePersistenceServiceImplTest {
                 .sharedArtists(mockSharedArtists)
                 .sharedGenres(mockSharedGenres)
                 .compatibilityReasons(mockCompatibilityReasons)
-                .lastCalculated(LocalDateTime.now()) // Will be set by @PrePersist
+                .lastCalculated(LocalDateTime.now())
                 .build();
 
-        // Initialize mock CompatibilityScoreResponseDto that would be returned by the mapper
         mockResponseDto = new CompatibilityScoreResponseDto(
                 new CompatibilityUserDto(userId.toString(), "TestUser"),
                 new CompatibilityUserDto(targetUserId.toString(), "TargetUser"),
@@ -103,8 +98,26 @@ class CompatibilityScorePersistenceServiceImplTest {
                 List.of(new ArtistCompatibilityDto("Artist X", 5, 10)),
                 List.of(new GenreCompatibilityDto("Pop", 0.3, 0.35)),
                 mockCompatibilityReasons,
-                LocalDateTime.now() // Mock mapper's lastCalculated
+                LocalDateTime.now()
         );
+    }
+
+
+    @Test
+    void getCompatibilityScore_shouldDeleteOldScoreAndSaveNewScore() {
+        // Arrange
+        when(userQueryService.findByUserId(userId)).thenReturn(user);
+        when(userQueryService.findByUserId(targetUserId)).thenReturn(targetUser);
+        doReturn(mockResponseDto).when(compatibilityPersistenceService).saveCompatibilityScore(user, targetUser);
+
+        // Act
+        CompatibilityScoreResponseDto resultDto = compatibilityPersistenceService.getCompatibilityScore(userId, targetUserId);
+
+        // Assert
+        assertNotNull(resultDto);
+        assertEquals(mockResponseDto, resultDto);
+        verify(compatibilityScoreCommandService, times(1)).deleteByUserAndTargetUser(user, targetUser);
+        verify(compatibilityPersistenceService, times(1)).saveCompatibilityScore(user, targetUser);
     }
 
     @Test
@@ -125,19 +138,16 @@ class CompatibilityScorePersistenceServiceImplTest {
         assertNotNull(resultDto);
         assertEquals(mockResponseDto, resultDto);
 
-
         verify(compatibilityScoreCreationService, times(1)).getSharedArtists(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).getSharedGenres(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).getDiscoveryCompatibility(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).getTasteCompatibility(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).buildCompatibilityReasons(mockSharedArtists, mockSharedGenres, mockDiscoveryCompatibility);
 
-        // Capture the CompatibilityScore argument passed to saveCompatibilityScore
         ArgumentCaptor<CompatibilityScore> scoreCaptor = ArgumentCaptor.forClass(CompatibilityScore.class);
         verify(compatibilityScoreCommandService, times(1)).saveCompatibilityScore(scoreCaptor.capture());
         CompatibilityScore capturedScore = scoreCaptor.getValue();
 
-        // Verify the captured score's content matches what buildCompatibilityScore would produce
         assertNotNull(capturedScore);
         assertEquals(user.getId(), capturedScore.getUser().getId());
         assertEquals(targetUser.getId(), capturedScore.getTargetUser().getId());
@@ -146,6 +156,45 @@ class CompatibilityScorePersistenceServiceImplTest {
         assertEquals(mockSharedArtists, capturedScore.getSharedArtists());
         assertEquals(mockSharedGenres, capturedScore.getSharedGenres());
         assertEquals(mockCompatibilityReasons, capturedScore.getCompatibilityReasons());
+    }
+
+
+    @Test
+    void saveCompatibilityScore_shouldNotSaveIfScoreIsTooLow() {
+        // Arrange
+        double lowTasteScore = 0.5;
+        double highDiscoveryScore = 0.8;
+        targetUser.setPublic(true);
+
+        when(compatibilityScoreCreationService.getTasteCompatibility(user, targetUser)).thenReturn(lowTasteScore);
+        when(compatibilityScoreCreationService.getDiscoveryCompatibility(user, targetUser)).thenReturn(highDiscoveryScore);
+        when(compatibilityScoreCreationService.getSharedArtists(any(), any())).thenReturn(Collections.emptyList());
+        when(compatibilityScoreCreationService.getSharedGenres(any(), any())).thenReturn(Collections.emptyList());
+        when(compatibilityScoreCreationService.buildCompatibilityReasons(any(), any(), anyDouble())).thenReturn(Collections.emptyList());
+        when(compatibilityScoreMapper.responseDto(any(CompatibilityScore.class))).thenReturn(mockResponseDto);
+
+        // Act
+        compatibilityPersistenceService.saveCompatibilityScore(user, targetUser);
+
+        // Assert
+        verify(compatibilityScoreCommandService, never()).saveCompatibilityScore(any(CompatibilityScore.class));
+        verify(compatibilityScoreMapper, times(1)).responseDto(any(CompatibilityScore.class));
+    }
+
+
+    @Test
+    void saveCompatibilityScore_shouldThrowExceptionForPrivateUser() {
+        // Arrange
+        targetUser.setPublic(false);
+
+        // Act & Assert
+        assertThrows(UserPrivacyException.class, () -> {
+            compatibilityPersistenceService.saveCompatibilityScore(user, targetUser);
+        });
+
+        verifyNoInteractions(compatibilityScoreCreationService);
+        verifyNoInteractions(compatibilityScoreCommandService);
+        verifyNoInteractions(compatibilityScoreMapper);
     }
 
     @Test
@@ -161,7 +210,7 @@ class CompatibilityScorePersistenceServiceImplTest {
         //Act
         CompatibilityScore builtScore = compatibilityPersistenceService.buildCompatibilityScore(user, targetUser);
 
-        // Assert the built score's properties
+        // Assert
         assertNotNull(builtScore);
         assertEquals(user, builtScore.getUser());
         assertEquals(targetUser, builtScore.getTargetUser());
@@ -171,26 +220,23 @@ class CompatibilityScorePersistenceServiceImplTest {
         assertEquals(mockSharedGenres, builtScore.getSharedGenres());
         assertEquals(mockCompatibilityReasons, builtScore.getCompatibilityReasons());
 
-        // Verify that creation service methods were called to build the score
         verify(compatibilityScoreCreationService, times(1)).getSharedArtists(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).getSharedGenres(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).getDiscoveryCompatibility(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).getTasteCompatibility(user, targetUser);
         verify(compatibilityScoreCreationService, times(1)).buildCompatibilityReasons(mockSharedArtists, mockSharedGenres, mockDiscoveryCompatibility);
 
-        // Ensure no interaction with command service or mapper in this specific test
         verifyNoInteractions(compatibilityScoreCommandService);
         verifyNoInteractions(compatibilityScoreMapper);
     }
 
     @Test
-    public void deleteCompatibilityScoresByUser_shouldSuccessfullyCallCommandService_toDeleteCompatibilityScores(){
-        //Act
+    void deleteCompatibilityScoresByUser_shouldSuccessfullyCallCommandService_toDeleteCompatibilityScores(){
+        // Act
         compatibilityPersistenceService.deleteCompatibilityScoresByUser(user);
 
-        //Assert
+        // Assert
         verify(compatibilityScoreCommandService, times(1)).deleteCompatibilityScoresByUser(user);
-
     }
 
 }

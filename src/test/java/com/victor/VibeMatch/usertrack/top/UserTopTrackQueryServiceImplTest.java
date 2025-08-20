@@ -70,4 +70,28 @@ class UserTopTrackQueryServiceImplTest {
         verify(userTopTrackRepository, times(1)).findByUser(testUser);
     }
 
+    @Test
+    public void existsByUser_shouldReturnTrueIfUserExists(){
+        //Arrange
+        when(userTopTrackRepository.existsByUser(testUser)).thenReturn(true);
+
+        //Act
+        boolean exists = userTopTrackQueryService.existsByUser(testUser);
+
+        //Assert
+        assertTrue(exists);
+    }
+
+    @Test
+    public void existsByUser_shouldReturnFalseIfUserDoesNotExist(){
+        //Arrange
+        when(userTopTrackRepository.existsByUser(testUser)).thenReturn(false);
+
+        //Act
+        boolean exists = userTopTrackQueryService.existsByUser(testUser);
+
+        //Assert
+        assertFalse(exists);
+    }
+
 }

@@ -12,8 +12,10 @@ import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.usertrack.UserTrackUtils;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrack;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrackCommandService;
+import com.victor.VibeMatch.usertrack.recent.UserRecentTrackQueryService;
 import com.victor.VibeMatch.usertrack.top.UserTopTrack;
 import com.victor.VibeMatch.usertrack.top.UserTopTrackCommandService;
+import com.victor.VibeMatch.usertrack.top.UserTopTrackQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
@@ -36,6 +38,8 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
     private final UserRecentTrackCommandService userRecentTrackCommandService;
     private final UserTopTrackCommandService userTopTrackCommandService;
     private final SpotifyDataOrchestratorService<T> orchestratorService;
+    private final UserTopTrackQueryService userTopTrackQueryService;
+    private final UserRecentTrackQueryService userRecentTrackQueryService;
 
     /**
      * Sync User Recent Track Data
@@ -54,7 +58,9 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
                 .map(recentTrack -> userTrackUtils.buildUserRecentTrack(recentTrack, user))
                 .toList();
 
-        userRecentTrackCommandService.deleteAllRecentTracksByUser(user);
+        if(userRecentTrackQueryService.existsByUser(user)){
+            userRecentTrackCommandService.deleteAllRecentTracksByUser(user);
+        }
         return userRecentTrackCommandService.saveRecentTracks(userRecentTracks);
     }
 
@@ -76,7 +82,9 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
 
         userTopTracks.forEach(userTopTrack -> System.out.println("TRACK NAME: " + userTopTrack.getName() + "\n"));
 
-        userTopTrackCommandService.deleteAllTopTracksByUser(user);
+        if(userTopTrackQueryService.existsByUser(user)){
+            userTopTrackCommandService.deleteAllTopTracksByUser(user);
+        }
         return userTopTrackCommandService.saveTopTracks(userTopTracks);
     }
 

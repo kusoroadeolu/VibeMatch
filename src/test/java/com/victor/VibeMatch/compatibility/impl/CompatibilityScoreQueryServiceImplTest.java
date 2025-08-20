@@ -2,7 +2,6 @@ package com.victor.VibeMatch.compatibility.impl;
 
 import com.victor.VibeMatch.compatibility.CompatibilityScore;
 import com.victor.VibeMatch.compatibility.CompatibilityScoreRepository;
-import com.victor.VibeMatch.exceptions.NoSuchUserException;
 import com.victor.VibeMatch.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,13 +27,18 @@ class CompatibilityScoreQueryServiceImplTest {
     private CompatibilityScoreScoreQueryServiceImpl compatibilityScoreQueryService;
 
     private CompatibilityScore compatibilityScore;
+    private User user;
+    private User targetUser;
 
     @BeforeEach
     public void setUp(){
+        user = User.builder().username("user").build();
+        targetUser = User.builder().username("target_user").build();
+
         compatibilityScore = CompatibilityScore
                 .builder()
-                .user(User.builder().username("user").build())
-                .targetUser(User.builder().username("target_user").build())
+                .user(user)
+                .targetUser(targetUser)
                 .discoveryCompatibility(0.6d)
                 .tasteCompatibility(0.7d)
                 .sharedArtists(List.of())
@@ -46,46 +50,42 @@ class CompatibilityScoreQueryServiceImplTest {
 
 
     @Test
-    void findByUserIdAndTargetId_shouldReturnCompatibilityScore_givenUserIdAndTargetId() {
+    void findByUserAndTargetUser_shouldReturnCompatibilityScore_givenUserAndTargetUser() {
         //Arrange
-        UUID userId = UUID.randomUUID();
-        UUID targetId = UUID.randomUUID();
-        when(compatibilityScoreRepository.findByKeyUserIdAndTargetUserId(userId, targetId)).thenReturn(compatibilityScore);
+        //
+        when(compatibilityScoreRepository.findByUserAndTargetUser(user, targetUser)).thenReturn(compatibilityScore);
 
         //Act
-        CompatibilityScore expected = compatibilityScoreQueryService.findByUserIdAndTargetId(userId, targetId);
+        CompatibilityScore expected = compatibilityScoreQueryService.findByUserAndTargetUser(user, targetUser);
 
         //Assert
         assertNotNull(expected);
         assertEquals(compatibilityScore, expected);
-        verify(compatibilityScoreRepository, times(1)).findByKeyUserIdAndTargetUserId(userId, targetId);
+        verify(compatibilityScoreRepository, times(1)).findByUserAndTargetUser(user, targetUser);
     }
 
     @Test
-    public void findByUserIdAndTargetId_shouldThrowNoSuchUserEx_givenNullUserId(){
-        //Arrange
-        UUID userId = null;
-        UUID targetId = UUID.randomUUID();
+    void existsByUserAndTargetUser_shouldReturnTrue_givenExistingScore() {
+        // Arrange
+        when(compatibilityScoreRepository.existsByUserAndTargetUser(user, targetUser)).thenReturn(true);
 
-        //Act & Assert
-         var ex = assertThrows(NoSuchUserException.class, () -> {
-             compatibilityScoreQueryService.findByUserIdAndTargetId(userId, targetId);
-         });
-         assertEquals("User ID or Target ID cannot be null", ex.getMessage());
-         verify(compatibilityScoreRepository, never()).findByKeyUserIdAndTargetUserId(userId, targetId);
+        // Act
+        boolean exists = compatibilityScoreQueryService.existsByUserAndTargetUser(user, targetUser);
+
+        assertTrue(exists);
+        verify(compatibilityScoreRepository, times(1)).existsByUserAndTargetUser(user, targetUser);
     }
 
     @Test
-    public void findByUserIdAndTargetId_shouldThrowNoSuchUserEx_givenNullTargetId(){
-        //Arrange
-        UUID userId = UUID.randomUUID();
-        UUID targetId = null;
+    void existsByUserAndTargetUser_shouldReturnFalse_givenNonExistingScore() {
+        // Arrange
+        when(compatibilityScoreRepository.existsByUserAndTargetUser(user, targetUser)).thenReturn(false);
 
-        //Act & Assert
-        var ex = assertThrows(NoSuchUserException.class, () -> {
-            compatibilityScoreQueryService.findByUserIdAndTargetId(userId, targetId);
-        });
-        assertEquals("User ID or Target ID cannot be null", ex.getMessage());
-        verify(compatibilityScoreRepository, never()).findByKeyUserIdAndTargetUserId(userId, targetId);
+        // Act
+        boolean exists = compatibilityScoreQueryService.existsByUserAndTargetUser(user, targetUser);
+
+        // Assert
+        assertFalse(exists);
+        verify(compatibilityScoreRepository, times(1)).existsByUserAndTargetUser(user, targetUser);
     }
 }

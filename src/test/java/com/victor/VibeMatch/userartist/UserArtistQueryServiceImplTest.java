@@ -15,8 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -186,5 +185,29 @@ class UserArtistQueryServiceImplTest {
         // Verify the interaction
         verify(userArtistRepository, times(1)).findByUserOrderByRankingAsc(testUser, limitArgument);
         verifyNoMoreInteractions(userArtistRepository);
+    }
+
+    @Test
+    public void existsByUser_shouldReturnTrueIfUserExists(){
+        //Arrange
+        when(userArtistRepository.existsByUser(testUser)).thenReturn(true);
+
+        //Act
+        boolean exists = userArtistQueryService.existsByUser(testUser);
+
+        //Assert
+        assertTrue(exists);
+    }
+
+    @Test
+    public void existsByUser_shouldReturnFalseIfUserDoesNotExist(){
+        //Arrange
+        when(userArtistRepository.existsByUser(testUser)).thenReturn(false);
+
+        //Act
+        boolean exists = userArtistQueryService.existsByUser(testUser);
+
+        //Assert
+        assertFalse(exists);
     }
 }

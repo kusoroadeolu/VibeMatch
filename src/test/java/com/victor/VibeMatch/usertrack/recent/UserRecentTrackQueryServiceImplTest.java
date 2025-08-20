@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,5 +59,29 @@ class UserRecentTrackQueryServiceImplTest {
         assertEquals(1, mockTracks.size());
         assertEquals(recentTracks.getFirst(), mockTracks.getFirst());
         verify(recentTrackRepository, times(1)).findByUser(testUser);
+    }
+
+    @Test
+    public void existsByUser_shouldReturnTrueIfUserExists(){
+        //Arrange
+        when(recentTrackRepository.existsByUser(testUser)).thenReturn(true);
+
+        //Act
+        boolean exists = recentTrackQueryService.existsByUser(testUser);
+
+        //Assert
+        assertTrue(exists);
+    }
+
+    @Test
+    public void existsByUser_shouldReturnFalseIfUserDoesNotExist(){
+        //Arrange
+        when(recentTrackRepository.existsByUser(testUser)).thenReturn(false);
+
+        //Act
+        boolean exists = recentTrackQueryService.existsByUser(testUser);
+
+        //Assert
+        assertFalse(exists);
     }
 }

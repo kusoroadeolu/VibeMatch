@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface UserRecentTrackQueryService {
     List<UserRecentTrack> findByUser(User user);
+
+    boolean existsByUser(User user);
 }

@@ -3,11 +3,15 @@ package com.victor.VibeMatch.compatibility.impl;
 import com.victor.VibeMatch.compatibility.*;
 import com.victor.VibeMatch.compatibility.dtos.CompatibilityScoreResponseDto;
 import com.victor.VibeMatch.compatibility.embeddables.CompatibilityWrapper;
+import com.victor.VibeMatch.exceptions.CompatibilityScorePersistenceException;
 import com.victor.VibeMatch.exceptions.UserPrivacyException;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,9 +29,12 @@ public class CompatibilityScorePersistenceServiceImpl implements CompatibilitySc
     private final CompatibilityScoreMapper compatibilityScoreMapper;
 
     @Override
+    @Transactional
+    @Retryable(retryFor = Exception.class, maxAttempts = 2, backoff = @Backoff(delay = 2000, multiplier = 2))
     public CompatibilityScoreResponseDto getCompatibilityScore(UUID userId, UUID targetUserId){
         User user = userQueryService.findByUserId(userId);
         User targetUser = userQueryService.findByUserId(targetUserId);
+        compatibilityScoreCommandService.deleteByUserAndTargetUser(user, targetUser);
         return saveCompatibilityScore(user, targetUser);
     }
 
@@ -47,9 +54,9 @@ public class CompatibilityScorePersistenceServiceImpl implements CompatibilitySc
 
         if(score.getDiscoveryCompatibility() >= 0.6 && score.getTasteCompatibility() >= 0.7){
              compatibilityScoreCommandService.saveCompatibilityScore(score);
+             log.info("Successfully saved compatibility score for user: {} and target user: {}", user.getUsername(), targetUser.getUsername());
         }
 
-        log.info("Successfully saved compatibility score for user: {} and target user: {}", user.getUsername(), targetUser.getUsername());
         return compatibilityScoreMapper.responseDto(score);
     }
 

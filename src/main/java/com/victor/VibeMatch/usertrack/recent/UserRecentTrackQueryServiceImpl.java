@@ -21,4 +21,9 @@ public class UserRecentTrackQueryServiceImpl implements UserRecentTrackQueryServ
         return recentTracks;
     }
 
+    @Override
+    public boolean existsByUser(User user){
+        return userRecentTrackRepository.existsByUser(user);
+    }
+
 }

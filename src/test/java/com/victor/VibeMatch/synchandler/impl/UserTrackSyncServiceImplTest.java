@@ -12,8 +12,10 @@ import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.usertrack.UserTrackUtils;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrack;
 import com.victor.VibeMatch.usertrack.recent.UserRecentTrackCommandService;
+import com.victor.VibeMatch.usertrack.recent.UserRecentTrackQueryService;
 import com.victor.VibeMatch.usertrack.top.UserTopTrack;
 import com.victor.VibeMatch.usertrack.top.UserTopTrackCommandService;
+import com.victor.VibeMatch.usertrack.top.UserTopTrackQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +31,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserTrackSyncServiceImplTest {
@@ -50,6 +50,10 @@ class UserTrackSyncServiceImplTest {
     private UserTopTrackCommandService userTopTrackCommandService;
     @Mock
     private SpotifyDataOrchestratorService<Object> orchestratorService;
+    @Mock
+    private UserTopTrackQueryService userTopTrackQueryService;
+    @Mock
+    private UserRecentTrackQueryService userRecentTrackQueryService;
 
     @InjectMocks
     private UserTrackSyncServiceImpl<Object> userTrackSyncService;
@@ -95,6 +99,7 @@ class UserTrackSyncServiceImplTest {
         )).thenReturn(new ArrayList<>(spotifyTracks));
         when(userTrackUtils.buildUserRecentTrack(any(SpotifyTrack.class), any(User.class)))
                 .thenReturn(new UserRecentTrack());
+        when(userRecentTrackQueryService.existsByUser(user)).thenReturn(false);
         when(userRecentTrackCommandService.saveRecentTracks(any())).thenReturn(userRecentTracks);
 
         // Act
@@ -108,7 +113,7 @@ class UserTrackSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(accessToken)
         );
-        verify(userRecentTrackCommandService, times(1)).deleteAllRecentTracksByUser(user);
+        verify(userRecentTrackCommandService, never()).deleteAllRecentTracksByUser(user);
         verify(userRecentTrackCommandService, times(1)).saveRecentTracks(any());
     }
 
@@ -124,6 +129,7 @@ class UserTrackSyncServiceImplTest {
         )).thenReturn(new ArrayList<>(spotifyTracks));
         when(userTrackUtils.buildUserTopTrack(any(SpotifyTrack.class), any(User.class)))
                 .thenReturn(new UserTopTrack());
+        when(userTopTrackQueryService.existsByUser(user)).thenReturn(false);
         when(userTopTrackCommandService.saveTopTracks(any())).thenReturn(userTopTracks);
 
         // Act
@@ -137,23 +143,20 @@ class UserTrackSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(accessToken)
         );
-        verify(userTopTrackCommandService, times(1)).deleteAllTopTracksByUser(user);
+        verify(userTopTrackCommandService, never()).deleteAllTopTracksByUser(user);
         verify(userTopTrackCommandService, times(1)).saveTopTracks(any());
     }
 
     @Test
     void syncRecentUserTracks_shouldRefreshAndSyncData_whenTokenIsNotCached() {
         // Arrange
-        // Mock a null token from the cache
         when(cacheService.getCachedToken(spotifyId)).thenReturn(invalidTokenDto);
-        // Mock the token refresh service to return a new token
         when(tokenRefreshService.refreshUserAccessToken(spotifyId)).thenReturn(refreshedTokenDto);
-        // Mock the rest of the dependencies as before
         when(configProperties.getShortTime()).thenReturn("short_term");
         when(orchestratorService.fetchSpotifyData(
                 eq(DataServiceEnum.TRACKS),
                 any(SpotifyDataRequestDto.class),
-                eq(refreshedTokenDto.accessToken()) // This is the crucial part, using the new token
+                eq(refreshedTokenDto.accessToken())
         )).thenReturn(new ArrayList<>(spotifyTracks));
         when(userTrackUtils.buildUserRecentTrack(any(SpotifyTrack.class), any(User.class)))
                 .thenReturn(new UserRecentTrack());
@@ -164,10 +167,8 @@ class UserTrackSyncServiceImplTest {
 
         // Assert
         assertEquals(userRecentTracks, result);
-        // Verify that the token was refreshed and then cached
         verify(tokenRefreshService, times(1)).refreshUserAccessToken(spotifyId);
         verify(cacheService, times(1)).cacheToken(spotifyId, refreshedTokenDto);
-        // Verify the orchestrator service was called with the new token
         verify(orchestratorService, times(1)).fetchSpotifyData(
                 eq(DataServiceEnum.TRACKS),
                 any(SpotifyDataRequestDto.class),

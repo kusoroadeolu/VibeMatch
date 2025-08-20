@@ -11,5 +11,7 @@ public interface UserTopTrackRepository extends JpaRepository<UserTopTrack, UUID
 
     List<UserTopTrack> findByUser(User user);
 
-    int deleteByUser(User user);
+    void deleteByUser(User user);
+
+    boolean existsByUser(User user);
 }

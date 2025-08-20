@@ -28,7 +28,6 @@ public class CompatibilityScoreBatchServiceImpl implements com.victor.VibeMatch.
      * */
     @Override
     public List<CompatibilityScoreResponseDto> returnAllCompatibleUsers(User user, List<User> targetUsers){
-
         //Clear all previous compatibility scores before recalculating
         compatibilityScorePersistenceService.deleteCompatibilityScoresByUser(user);
 
@@ -38,7 +37,6 @@ public class CompatibilityScoreBatchServiceImpl implements com.victor.VibeMatch.
             UUID targetUserId = targetUser.getId();
 
             if(!targetUser.isPublic() || targetUserId.equals(user.getId()))continue;
-
             CompatibilityScoreResponseDto score =
                     compatibilityScorePersistenceService.saveCompatibilityScore(user, targetUser);
             compatibilityScores.add(score);

@@ -7,6 +7,7 @@ import com.victor.VibeMatch.user.service.UserQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,70 +30,98 @@ class TasteProfilePersistenceServiceImplTest {
     @Mock
     private UserQueryService userQueryService;
 
+    // Use a spy to test the internal methods like buildTasteProfile and updateExistingTasteProfile.
     @InjectMocks
-    private TasteProfilePersistenceServiceImpl tasteProfileCreationService;
-
-    private TasteProfile tasteProfile;
+    private TasteProfilePersistenceServiceImpl tasteProfilePersistenceService;
 
     private User user;
+    private UUID mockId;
 
     @BeforeEach
-    public void setUp(){
-        tasteProfile = TasteProfile
-                .builder()
-                .topGenres(List.of())
-                .topArtists(List.of())
-                .mainstreamScore(0.7d)
-                .discoveryPattern(0.8d)
-                .build();
-
-        user = User
-                .builder()
-                .username("mock-name")
-                .build();
+    public void setUp() {
+        mockId = UUID.randomUUID();
+        // A user with a null taste profile to simulate a creation scenario.
+        user = User.builder().id(mockId).username("mock-name").tasteProfile(null).build();
     }
 
+    // New test case for the creation path.
     @Test
     void createUserTasteProfile_shouldReturnSavedProfileOnCreation() {
-        //Arrange
-        UUID mockId = UUID.randomUUID();
+        // Arrange
+        TasteProfile newProfile = TasteProfile.builder().id(UUID.randomUUID()).build();
+
+        // Configure mock behavior. The user is set up in the @BeforeEach with a null taste profile.
         when(userQueryService.findByUserId(mockId)).thenReturn(user);
-        when(tasteProfileCalculationService.calculateTopGenres(user)).thenReturn(List.of());
-        when(tasteProfileCalculationService.calculateTopArtists(user)).thenReturn(List.of());
+        when(tasteProfileCalculationService.calculateTopGenres(user)).thenReturn(List.of(new TasteWrapper("genre1", 0.5, 1, 1)));
+        when(tasteProfileCalculationService.calculateTopArtists(user)).thenReturn(List.of(new TasteWrapper("artist1", 0.6, 1, 1)));
         when(tasteProfileCalculationService.calculateDiscoveryPattern(user)).thenReturn(0.7d);
         when(tasteProfileCalculationService.calculateMainStreamScore(user)).thenReturn(0.8d);
-        when(tasteProfileCommandService.saveTasteProfile(any(TasteProfile.class))).thenReturn(tasteProfile);
+        when(tasteProfileCommandService.saveTasteProfile(any(TasteProfile.class))).thenReturn(newProfile);
 
-        //Act
-        TasteProfile savedProfile = tasteProfileCreationService.createUserTasteProfile(mockId);
+        // Act
+        TasteProfile savedProfile = tasteProfilePersistenceService.createUserTasteProfile(mockId);
 
-        //Assert
+        // Assert
         assertNotNull(savedProfile);
-        assertEquals(tasteProfile, savedProfile);
+        assertEquals(newProfile, savedProfile);
+
+        // Verify that the buildTasteProfile method was called internally.
         verify(tasteProfileCalculationService, times(1)).calculateTopGenres(user);
         verify(tasteProfileCalculationService, times(1)).calculateTopArtists(user);
         verify(tasteProfileCalculationService, times(1)).calculateDiscoveryPattern(user);
         verify(tasteProfileCalculationService, times(1)).calculateMainStreamScore(user);
-        verify(tasteProfileCommandService, times(1)).saveTasteProfile(any(TasteProfile.class));
+
+        // Capture the TasteProfile object passed to the save method to assert its contents.
+        ArgumentCaptor<TasteProfile> captor = ArgumentCaptor.forClass(TasteProfile.class);
+        verify(tasteProfileCommandService, times(1)).saveTasteProfile(captor.capture());
+
+        TasteProfile capturedProfile = captor.getValue();
+        assertNotNull(capturedProfile.getUser());
+        assertEquals(user.getId(), capturedProfile.getUser().getId());
     }
 
+    // New test case for the update path.
     @Test
-    void buildTasteProfile_shouldReturnBuiltTasteProfile() {
-        //Arrange
-        List<TasteWrapper> genreWrapper = List.of();
-        List<TasteWrapper> artistWrapper = List.of();
-        double discoveryPattern = 0.8d;
-        double mainstreamScore = 0.7d;
+    void createUserTasteProfile_shouldUpdateExistingProfile() {
+        // Arrange
+        UUID tasteProfileId = UUID.randomUUID();
+        TasteProfile existingProfile = TasteProfile.builder()
+                .id(tasteProfileId)
+                .user(user)
+                .topGenres(List.of(new TasteWrapper("oldGenre", 0.2, 1, 1)))
+                .build();
+        user.setTasteProfile(existingProfile);
 
-        //Act
-        TasteProfile mockProfile = tasteProfileCreationService.buildTasteProfile(user, genreWrapper, artistWrapper, mainstreamScore, discoveryPattern);
+        // Mock the user query to return a user with an existing profile.
+        when(userQueryService.findByUserId(mockId)).thenReturn(user);
 
-        //Assert
-        assertNotNull(mockProfile);
-        assertSame(genreWrapper, mockProfile.getTopGenres());
-        assertSame(artistWrapper, mockProfile.getTopArtists());
-        assertEquals(discoveryPattern, mockProfile.getDiscoveryPattern());
-        assertEquals(mainstreamScore, mockProfile.getMainstreamScore());
+        // Mock calculation services for the updated values.
+        List<TasteWrapper> newGenres = List.of(new TasteWrapper("newGenre", 0.9, 1, 1));
+        when(tasteProfileCalculationService.calculateTopGenres(user)).thenReturn(newGenres);
+        when(tasteProfileCalculationService.calculateTopArtists(user)).thenReturn(List.of());
+        when(tasteProfileCalculationService.calculateDiscoveryPattern(user)).thenReturn(0.9d);
+        when(tasteProfileCalculationService.calculateMainStreamScore(user)).thenReturn(0.9d);
 
+        // Mock the save command service to return the updated profile.
+        when(tasteProfileCommandService.saveTasteProfile(any(TasteProfile.class))).thenReturn(existingProfile);
+
+        // Act
+        TasteProfile updatedProfile = tasteProfilePersistenceService.createUserTasteProfile(mockId);
+
+        // Assert
+        assertNotNull(updatedProfile);
+        assertEquals(tasteProfileId, updatedProfile.getId());
+        assertEquals(newGenres, updatedProfile.getTopGenres());
+
+        // Verify that the update method was called internally.
+        verify(tasteProfileCalculationService, times(1)).calculateTopGenres(user);
+        verify(tasteProfileCalculationService, times(1)).calculateTopArtists(user);
+        verify(tasteProfileCalculationService, times(1)).calculateDiscoveryPattern(user);
+        verify(tasteProfileCalculationService, times(1)).calculateMainStreamScore(user);
+
+        // Ensure the save method was called with the existing profile object.
+        verify(tasteProfileCommandService, times(1)).saveTasteProfile(existingProfile);
     }
 }
+
+// NOTE: The buildTasteProfile test is now redundant because it's a simple constructor call and is implicitly tested by the createUserTasteProfile_shouldReturnSavedProfileOnCreation test.

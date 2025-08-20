@@ -6,4 +6,6 @@ public interface CompatibilityScoreCommandService {
     CompatibilityScore saveCompatibilityScore(CompatibilityScore compatibilityScore);
 
     void deleteCompatibilityScoresByUser(User user);
+
+    void deleteByUserAndTargetUser(User user, User targetUser);
 }

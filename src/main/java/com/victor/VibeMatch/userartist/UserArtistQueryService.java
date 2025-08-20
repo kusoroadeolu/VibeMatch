@@ -8,4 +8,6 @@ public interface UserArtistQueryService {
     List<UserArtist> findArtistsByUser(User user);
 
     List<UserArtist> findArtistsByUserOrderByRanking(User user, int limit);
+
+    boolean existsByUser(User user);
 }

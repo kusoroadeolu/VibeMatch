@@ -46,19 +46,13 @@ public class UserTopTrackCommandServiceImpl implements UserTopTrackCommandServic
     public void deleteAllTopTracksByUser(User user) {
         if (user == null) {
             log.warn("Attempted to delete tracks with null user");
-            throw new NoSuchUserException("User cannot be null");
+            throw new UserTrackDeletionException("User cannot be null");
         }
 
 
         try {
             log.info("Deleting all top tracks for user: {}", user.getId());
-            int deletedCount = userTopTrackRepository.deleteByUser(user);
-
-            if (deletedCount > 0) {
-                log.debug("Deleted {} top tracks for user: {}", deletedCount, user.getId());
-            } else {
-                log.debug("No top tracks found for user: {}", user.getId());
-            }
+            userTopTrackRepository.deleteByUser(user);
 
         } catch (Exception e) {
             log.error("Error deleting top tracks for user: {}", user.getId(), e);

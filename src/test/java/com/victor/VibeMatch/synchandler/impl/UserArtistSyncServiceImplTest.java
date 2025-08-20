@@ -11,6 +11,7 @@ import com.victor.VibeMatch.spotify.dto.SpotifyDataRequestDto;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.userartist.UserArtist;
 import com.victor.VibeMatch.userartist.UserArtistCommandServiceImpl;
+import com.victor.VibeMatch.userartist.UserArtistQueryService;
 import com.victor.VibeMatch.userartist.mapper.UserArtistMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,9 @@ class UserArtistSyncServiceImplTest {
 
     @Mock
     private SpotifyDataOrchestratorService<Object> orchestratorService;
+
+    @Mock
+    private UserArtistQueryService userArtistQueryService;
 
     @InjectMocks
     private UserArtistSyncServiceImpl<Object> userArtistSyncService;
@@ -100,6 +104,7 @@ class UserArtistSyncServiceImplTest {
 
         when(userArtistMapper.buildUserArtist(any(User.class), any(SpotifyArtist.class)))
                 .thenReturn(new UserArtist());
+        when(userArtistQueryService.existsByUser(user)).thenReturn(false);
         when(userArtistCommandService.saveUserArtists(any())).thenReturn(userArtists);
 
         // Act
@@ -115,7 +120,7 @@ class UserArtistSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(accessToken)
         );
-        verify(userArtistCommandService, times(1)).deleteByUser(user);
+        verify(userArtistCommandService, never()).deleteByUser(user);
         verify(userArtistCommandService, times(1)).saveUserArtists(any());
     }
 
@@ -139,6 +144,7 @@ class UserArtistSyncServiceImplTest {
 
         when(userArtistMapper.buildUserArtist(any(User.class), any(SpotifyArtist.class)))
                 .thenReturn(new UserArtist());
+        when(userArtistQueryService.existsByUser(user)).thenReturn(false);
         when(userArtistCommandService.saveUserArtists(any())).thenReturn(userArtists);
 
         // Act
@@ -156,6 +162,7 @@ class UserArtistSyncServiceImplTest {
                 any(SpotifyDataRequestDto.class),
                 eq(refreshedTokenDto.accessToken())
         );
+        verify(userArtistCommandService, never()).deleteByUser(user);
         verify(userArtistCommandService, times(1)).saveUserArtists(any());
     }
 }

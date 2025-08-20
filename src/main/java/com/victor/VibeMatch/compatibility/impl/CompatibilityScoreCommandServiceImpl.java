@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -42,5 +40,10 @@ public class CompatibilityScoreCommandServiceImpl implements com.victor.VibeMatc
             log.info("An error occurred while trying to delete all compatibility scores for user: {}", user.getUsername());
             throw new CompatibilityScoreDeleteException(String.format("An error occurred while trying to delete all compatibility scores for user: %s", user.getUsername()));
         }
+    }
+
+    @Override
+    public void deleteByUserAndTargetUser(User user, User targetUser) {
+        compatibilityScoreRepository.deleteByUserAndTargetUser(user, targetUser);
     }
 }
