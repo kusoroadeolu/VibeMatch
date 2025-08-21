@@ -79,8 +79,6 @@ class TasteProfilePersistenceServiceImplTest {
         assertNotNull(capturedProfile.getUser());
         assertEquals(user.getId(), capturedProfile.getUser().getId());
     }
-
-    // New test case for the update path.
     @Test
     void createUserTasteProfile_shouldUpdateExistingProfile() {
         // Arrange
@@ -92,17 +90,14 @@ class TasteProfilePersistenceServiceImplTest {
                 .build();
         user.setTasteProfile(existingProfile);
 
-        // Mock the user query to return a user with an existing profile.
         when(userQueryService.findByUserId(mockId)).thenReturn(user);
 
-        // Mock calculation services for the updated values.
         List<TasteWrapper> newGenres = List.of(new TasteWrapper("newGenre", 0.9, 1, 1));
         when(tasteProfileCalculationService.calculateTopGenres(user)).thenReturn(newGenres);
         when(tasteProfileCalculationService.calculateTopArtists(user)).thenReturn(List.of());
         when(tasteProfileCalculationService.calculateDiscoveryPattern(user)).thenReturn(0.9d);
         when(tasteProfileCalculationService.calculateMainStreamScore(user)).thenReturn(0.9d);
 
-        // Mock the save command service to return the updated profile.
         when(tasteProfileCommandService.saveTasteProfile(any(TasteProfile.class))).thenReturn(existingProfile);
 
         // Act
@@ -113,15 +108,12 @@ class TasteProfilePersistenceServiceImplTest {
         assertEquals(tasteProfileId, updatedProfile.getId());
         assertEquals(newGenres, updatedProfile.getTopGenres());
 
-        // Verify that the update method was called internally.
         verify(tasteProfileCalculationService, times(1)).calculateTopGenres(user);
         verify(tasteProfileCalculationService, times(1)).calculateTopArtists(user);
         verify(tasteProfileCalculationService, times(1)).calculateDiscoveryPattern(user);
         verify(tasteProfileCalculationService, times(1)).calculateMainStreamScore(user);
 
-        // Ensure the save method was called with the existing profile object.
         verify(tasteProfileCommandService, times(1)).saveTasteProfile(existingProfile);
     }
 }
 
-// NOTE: The buildTasteProfile test is now redundant because it's a simple constructor call and is implicitly tested by the createUserTasteProfile_shouldReturnSavedProfileOnCreation test.

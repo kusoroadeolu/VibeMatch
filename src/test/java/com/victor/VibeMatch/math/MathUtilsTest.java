@@ -137,4 +137,17 @@ class MathUtilsTest {
         assertEquals(expectedSimilarity, cosineSimilarity);
 
     }
+
+    @Test
+    public void shouldRoundToThreeDP(){
+        //Arrange
+        double num = 0.72222;
+        Double expected = 0.722;
+
+        //Act
+        double rounded = mathUtils.round(num);
+
+        //Assert
+        assertEquals(expected, rounded);
+    }
 }

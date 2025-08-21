@@ -1,6 +1,7 @@
 package com.victor.VibeMatch.compatibility;
 
 import com.victor.VibeMatch.compatibility.dtos.CompatibilityScoreResponseDto;
+import com.victor.VibeMatch.misc.UUIDValidator;
 import com.victor.VibeMatch.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +22,13 @@ public class CompatibilityScoreController {
 
     private final CompatibilityScorePersistenceService compatibilityScorePersistenceService;
     private final CompatibilityScoreBatchService compatibilityScoreBatchService;
+    private final UUIDValidator uuidValidator;
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<CompatibilityScoreResponseDto> calculateScore(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("id")UUID targetUserId){
+    public ResponseEntity<CompatibilityScoreResponseDto> calculateScore(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("id")String targetUserIdString){
+        UUID targetUserId = uuidValidator.handleUUID(targetUserIdString);
+
         log.info("Target User ID: {}", targetUserId);
         UUID userId = userPrincipal.getId();
         var response = compatibilityScorePersistenceService.getCompatibilityScore(userId, targetUserId);

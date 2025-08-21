@@ -54,7 +54,7 @@ class TasteProfileCacheServiceImplTest {
                         new ArtistDto("Taylor Swift", 2)
                 ),
                 0.75,                               // mainstreamScore
-                0.25,                               // discoveryPattern
+                "Loyalist",                               // discoveryPattern
                 LocalDateTime.now()                 // lastUpdated
         );
 

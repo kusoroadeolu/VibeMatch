@@ -88,4 +88,5 @@ class CompatibilityScoreQueryServiceImplTest {
         assertFalse(exists);
         verify(compatibilityScoreRepository, times(1)).existsByUserAndTargetUser(user, targetUser);
     }
+
 }

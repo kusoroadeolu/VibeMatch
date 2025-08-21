@@ -1,5 +1,7 @@
 package com.victor.VibeMatch.tasteprofile.impl;
 
+import com.victor.VibeMatch.cache.TasteProfileCacheService;
+import com.victor.VibeMatch.tasteprofile.TasteProfile;
 import com.victor.VibeMatch.tasteprofile.TasteProfileCalculationService;
 import com.victor.VibeMatch.tasteprofile.utils.TasteProfileUtils;
 import com.victor.VibeMatch.tasteprofile.embeddables.TasteWrapper;
@@ -57,6 +59,7 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
 
         return tasteWrappers;
     }
+
 
     /**
      * Calculates the top 3 artists for a user

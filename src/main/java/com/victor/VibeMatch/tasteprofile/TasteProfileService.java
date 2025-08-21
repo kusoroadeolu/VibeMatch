@@ -6,4 +6,8 @@ import java.util.UUID;
 
 public interface TasteProfileService {
     TasteProfileResponseDto createTasteProfile(UUID userId);
+
+    TasteProfileResponseDto getTasteProfile(UUID userId);
+
+    void removeTasteProfile(UUID userId);
 }

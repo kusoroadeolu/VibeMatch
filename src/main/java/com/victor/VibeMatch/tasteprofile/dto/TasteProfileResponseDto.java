@@ -10,7 +10,7 @@ public record TasteProfileResponseDto(
         List<GenreDto> topGenres,
         List<ArtistDto> topArtists,
         double mainstreamScore,
-        double discoveryPattern,
+        String discoveryPattern,
         LocalDateTime lastUpdated
 ) {
 }

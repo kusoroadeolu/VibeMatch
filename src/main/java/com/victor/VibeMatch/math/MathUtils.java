@@ -109,9 +109,6 @@ public class MathUtils{
     }
 
     public Double round(Double val){
-        return new BigDecimal(val.toString()).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        return new BigDecimal(val.toString()).setScale(3, RoundingMode.HALF_UP).doubleValue();
     }
-
-
-
 }
