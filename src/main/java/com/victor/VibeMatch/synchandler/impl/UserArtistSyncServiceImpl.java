@@ -14,6 +14,7 @@ import com.victor.VibeMatch.userartist.UserArtistCommandService;
 import com.victor.VibeMatch.userartist.UserArtistCommandServiceImpl;
 import com.victor.VibeMatch.userartist.UserArtistQueryService;
 import com.victor.VibeMatch.userartist.mapper.UserArtistMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
@@ -42,11 +43,15 @@ public class UserArtistSyncServiceImpl<T> implements UserArtistSyncService {
      * Sync User Artist Data
      * @param user The user being synced
      * */
+    @Transactional
     @Override
     public List<UserArtist> syncUserArtist(User user){
         log.info("Initiating sync for {} top artists.", user.getUsername());
 
         List<SpotifyArtist> spotifyArtists = fetchUserTopArtist(user.getSpotifyId());
+
+        if (spotifyArtists.isEmpty())return List.of();
+
         log.info("Successfully fetched spotify artists for user: {}", user.getUsername());
 
         List<UserArtist> userArtists = spotifyArtists

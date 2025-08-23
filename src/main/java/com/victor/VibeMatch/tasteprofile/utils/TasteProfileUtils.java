@@ -53,7 +53,7 @@ public class TasteProfileUtils {
             int value = entry.getValue();
             String key = entry.getKey();
 
-            if(count < 3){
+            if(count < 5){
                 mapTopGenres.put(key, value);
                 count++;
             }else{
@@ -61,7 +61,7 @@ public class TasteProfileUtils {
             }
         }
 
-        log.info("Successfully mapped top 3 genres to their count");
+        log.info("Successfully mapped top 5 genres to their count");
         return mapTopGenres;
     }
 

@@ -50,14 +50,7 @@ public class UserRecentTrackCommandServiceImpl implements UserRecentTrackCommand
 
         try {
             log.info("Deleting all recent tracks for user: {}", user.getId());
-            int deletedCount = userRecentTrackRepository.deleteByUser(user);
-
-            if (deletedCount > 0) {
-                log.debug("Deleted {} recent tracks for user: {}", deletedCount, user.getId());
-            } else {
-                log.debug("No recent tracks found for user: {}", user.getId());
-            }
-
+             userRecentTrackRepository.deleteByUser(user);
         } catch (Exception e) {
             log.error("Error deleting recent tracks for user: {}", user.getId(), e);
             throw new UserTrackDeletionException("Failed to delete recent tracks for user: " + user.getId(), e);

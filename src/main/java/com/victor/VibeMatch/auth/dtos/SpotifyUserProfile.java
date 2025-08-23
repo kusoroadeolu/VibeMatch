@@ -6,9 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SpotifyUserProfile {
     @JsonProperty("display_name")
     private String displayName;
@@ -21,4 +24,9 @@ public class SpotifyUserProfile {
 
     @JsonProperty("country")
     private String country;
+
+    @JsonProperty("images")
+    private List<SpotifyImage> images;
+
+
 }

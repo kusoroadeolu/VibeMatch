@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(indexes = @Index(name = "rec_idx", columnList = "recommended_to_id"))
 @Getter
 @Builder
 @NoArgsConstructor
@@ -21,6 +22,7 @@ public class Recommendation {
             strategy = GenerationType.UUID
     )
     private UUID id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recommender_id")

@@ -24,11 +24,11 @@ public class RecommendationController {
     @PostMapping("/{friendId}")
     public ResponseEntity<Void> sendRecommendation(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable String friendIdString,
+            @PathVariable("friendId") String friendIdString,
             @RequestBody RecommendationRequestDto requestDto) {
 
-        UUID friendId = uuidValidator.handleUUID(friendIdString);
-        recommendationService.sendRecommendation(userPrincipal.getId(), friendId, requestDto);
+        UUID uuid = uuidValidator.handleUUID(friendIdString);
+        recommendationService.sendRecommendation(userPrincipal.getId(), uuid, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

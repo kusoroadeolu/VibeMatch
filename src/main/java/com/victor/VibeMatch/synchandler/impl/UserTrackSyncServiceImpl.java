@@ -16,6 +16,7 @@ import com.victor.VibeMatch.usertrack.recent.UserRecentTrackQueryService;
 import com.victor.VibeMatch.usertrack.top.UserTopTrack;
 import com.victor.VibeMatch.usertrack.top.UserTopTrackCommandService;
 import com.victor.VibeMatch.usertrack.top.UserTopTrackQueryService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
@@ -45,6 +46,7 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
      * Sync User Recent Track Data
      * @param user The user being synced
      * */
+    @Transactional
     @Override
     public List<UserRecentTrack> syncRecentUserTracks(User user){
         log.info("Initiating sync for {} recent tracks.", user.getUsername());
@@ -68,6 +70,7 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
      * Sync User Top Track Data
      * @param user The user being synced
      * */
+    @Transactional
     @Override
     public List<UserTopTrack> syncTopUserTracks(User user){
         log.info("Initiating sync for {} top tracks.", user.getUsername());
@@ -108,6 +111,8 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
         String accessToken = handleAccessToken(spotifyId);
 
         ArrayList<SpotifyTrack> spotifyTracks = new ArrayList<>();
+
+
         try{
             spotifyTracks = orchestratorService.fetchSpotifyData(TRACKS, requestDto, accessToken);
         }catch (AuthorizationException e){
@@ -115,6 +120,10 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
             cacheService.evictCachedToken(spotifyId);
             throw e;
         }
+
+        if(spotifyTracks == null || spotifyTracks.isEmpty())return List.of();
+
+
         return spotifyTracks;
     }
 

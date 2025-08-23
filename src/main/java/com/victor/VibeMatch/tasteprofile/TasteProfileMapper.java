@@ -34,10 +34,13 @@ public class TasteProfileMapper {
         List<GenreDto> dtos = new ArrayList<>();
 
         for(TasteWrapper tasteWrapper: tasteWrappers){
-            dtos.add(new GenreDto(tasteWrapper.getName(), mathUtils.round(tasteWrapper.getPercentage()), tasteWrapper.getCount()));
+            String str = firstCharUpperCase(tasteWrapper.getName());
+            dtos.add(new GenreDto(str, mathUtils.round(tasteWrapper.getPercentage()), tasteWrapper.getCount()));
         }
         return dtos;
     }
+
+
 
     public List<ArtistDto> mapTasteWrappersToArtistDtos(List<TasteWrapper> tasteWrappers){
         List<ArtistDto> dtos = new ArrayList<>();
@@ -48,17 +51,22 @@ public class TasteProfileMapper {
         return dtos;
     }
 
-    public String discoveryRole(double discoveryPattern){
+    private String firstCharUpperCase(String str){
+        return str.trim().substring(0, 1).toUpperCase()
+                + str.substring(1).toLowerCase();
+    }
+
+    private String discoveryRole(double discoveryPattern){
         String role = "";
 
         if(discoveryPattern >= 0 && discoveryPattern < 0.45){
-            return "Loyalist";
+            return "Your playlist is your comfort zone";
         }else if(discoveryPattern >= 0.45 && discoveryPattern < 0.55){
-            return "Balanced";
+            return "You mix old favorites with new finds";
         }else if(discoveryPattern >= 0.55 && discoveryPattern <= 1){
-            return "Explorer";
+            return "You live for that perfect deep cut";
         }else{
-            return "Weird";
+            return "Your taste doesn't fit any box";
         }
     }
 }

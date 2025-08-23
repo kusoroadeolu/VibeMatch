@@ -4,6 +4,7 @@ import com.victor.VibeMatch.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -32,11 +33,19 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login/**", "/auth/callback/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/main.js", "/profile.js" ,"/navigation.js" , "/compatibility.js" ,"/style.css", "*.otf", "*.ttf", "/favicon.ico").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .logout(logout -> {
+                    logout.logoutUrl("/auth/logout")
+                            .logoutSuccessUrl("/index.html")
+                            .invalidateHttpSession(true)
+                            .deleteCookies("jwtToken", "refreshToken");
+                })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

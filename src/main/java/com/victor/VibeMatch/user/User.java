@@ -43,9 +43,10 @@ public class User {
 
     private LocalDateTime lastSyncedAt;
 
-    //TODO Encrypt this
     @Column(nullable = false)
     private String refreshToken;
+
+    private String imageUrl;
 
     private Role role;
 
@@ -74,6 +75,7 @@ public class User {
 
     @PrePersist
     public void onCreate(){
+        this.isPublic = true;
         this.createdAt = LocalDateTime.now();
     }
 

@@ -65,6 +65,15 @@ public class ConnectionQueryServiceImpl implements ConnectionQueryService {
 
     @Override
     public boolean activeConnectionExists(User userA, User userB){
-        return connectionRepository.existsByUserAAndUserBAndIsConnectedTrue(userA, userB);
+
+        User canonicalUserA = userA;
+        User canonicalUserB = userB;
+
+        if(userA.getId().compareTo(userB.getId()) < 0){
+            canonicalUserA = userB;
+            canonicalUserB = userA;
+        }
+
+        return connectionRepository.existsByUserAAndUserBAndIsConnectedTrue(canonicalUserA, canonicalUserB);
     }
 }

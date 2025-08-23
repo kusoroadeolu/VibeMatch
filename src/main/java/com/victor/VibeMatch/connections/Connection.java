@@ -43,16 +43,18 @@ public class Connection {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, updatable = false)
     private LocalDateTime connectedSince;
 
     private boolean isConnected = false;
 
     @PrePersist
     public void onCreate(){
-
         createdAt = LocalDateTime.now();
+    }
 
+    public void acceptConnection(){
+        this.connectedSince = LocalDateTime.now();
+        this.isConnected = true;
     }
 
 }

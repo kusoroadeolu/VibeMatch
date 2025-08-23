@@ -54,7 +54,7 @@ class TasteProfileCacheServiceImplTest {
                         new ArtistDto("Taylor Swift", 2)
                 ),
                 0.75,                               // mainstreamScore
-                "Loyalist",                               // discoveryPattern
+                "Loyalist",                               // howYouListen
                 LocalDateTime.now()                 // lastUpdated
         );
 
@@ -81,7 +81,7 @@ class TasteProfileCacheServiceImplTest {
         assertNotNull(mockProfile);
         assertNotNull(cachedValue);
         assertEquals(mockProfile.userId(), cachedValue.userId());
-        assertEquals(mockProfile.discoveryPattern(), cachedValue.discoveryPattern());
+        assertEquals(mockProfile.howYouListen(), cachedValue.howYouListen());
 
     }
 
@@ -107,7 +107,7 @@ class TasteProfileCacheServiceImplTest {
         //Assert
         assertNotNull(cachedProfile);
         assertEquals(mockProfile.userId(), cachedProfile.userId());
-        assertEquals(mockProfile.discoveryPattern(), cachedProfile.discoveryPattern());
+        assertEquals(mockProfile.howYouListen(), cachedProfile.howYouListen());
 
     }
 

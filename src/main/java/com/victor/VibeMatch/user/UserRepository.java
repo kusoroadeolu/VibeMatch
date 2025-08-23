@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findBySpotifyId(String spotifyId);
 
     List<User> findByLastSyncedAtBefore(LocalDateTime now);
+
+    List<User> findByIsPublicTrue();
 }

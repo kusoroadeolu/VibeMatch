@@ -37,7 +37,7 @@ public class CompatibilityScoreController {
 
     @GetMapping("/discover")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<CompatibilityScoreResponseDto>> calculateScore(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<List<CompatibilityScoreResponseDto>> discoverCompatibleUsers(@AuthenticationPrincipal UserPrincipal userPrincipal){
         UUID userId = userPrincipal.getId();
         var response = compatibilityScoreBatchService.findCompatibleUsersInBatch(userId);
         return ResponseEntity.ok(response);

@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -133,6 +130,8 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
 
         return (artistSimilarity + genreOverlap) * .5;
     }
+
+
 
 
     public List<Double> getWeightedVectorsBasedOnPopularity(double avgPopularity, int threshold, int artistSize ,List<UserArtist> artists){

@@ -25,10 +25,10 @@ public class ConnectionController {
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<ActiveConnectionResponseDto>> getAllActiveConnections(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<List<ActiveConnectionResponseDto>> getAllActiveConnectionsForAUser(@AuthenticationPrincipal UserPrincipal userPrincipal){
         UUID userId = userPrincipal.getId();
         List<ActiveConnectionResponseDto> dtos = connectionService.findAllActiveConnections(userId);
-        return new ResponseEntity<>(dtos, HttpStatus.FOUND);
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @GetMapping("/received")
@@ -36,7 +36,7 @@ public class ConnectionController {
     public ResponseEntity<List<InactiveConnectionResponseDto>> getPendingReceivedConnections(@AuthenticationPrincipal UserPrincipal userPrincipal){
         UUID userId = userPrincipal.getId();
         List<InactiveConnectionResponseDto> dtos = connectionService.findPendingReceivedConnections(userId);
-        return new ResponseEntity<>(dtos, HttpStatus.FOUND);
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @GetMapping("/sent")
@@ -44,7 +44,7 @@ public class ConnectionController {
     public ResponseEntity<List<InactiveConnectionResponseDto>> getPendingSentConnections(@AuthenticationPrincipal UserPrincipal userPrincipal){
         UUID userId = userPrincipal.getId();
         List<InactiveConnectionResponseDto> dtos = connectionService.findPendingSentConnections(userId);
-        return new ResponseEntity<>(dtos, HttpStatus.FOUND);
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @GetMapping("/{userId}")
@@ -55,7 +55,7 @@ public class ConnectionController {
         UUID targetUserId = uuidValidator.handleUUID(targetUserIdString);
 
         ActiveConnectionResponseDto dto = connectionService.findActiveConnectionBetweenTwoUsers(id, targetUserId);
-        return new ResponseEntity<>(dto, HttpStatus.FOUND);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("/request/{userId}")
@@ -72,12 +72,12 @@ public class ConnectionController {
     public ResponseEntity<Void> removeConnection(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("userId") String targetUserIdString){
         UUID id = userPrincipal.getId();
         UUID targetUserId = uuidValidator.handleUUID(targetUserIdString);
-        ConnectionWrapperResponseDto dto = connectionService.requestConnection(id, targetUserId);
         connectionService.removeConnection(id, targetUserId);
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{userId}/accept")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ActiveConnectionResponseDto> acceptConnectionRequest(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("userId") String targetUserIdString){
         UUID receiverId = userPrincipal.getId();
         UUID targetUserId = uuidValidator.handleUUID(targetUserIdString);

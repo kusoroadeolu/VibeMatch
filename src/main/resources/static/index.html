@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeMatch - Connect Through Music</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'AlibabaSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlibabaSans-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'AlibabaSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlibabaSans-Medium.otf') format('opentype');
+            font-weight: 500;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'AlibabaSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/Alibaba-PuHuiTi-Bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'AlibabaSans', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            line-height: 1.6;
+            width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            position: fixed;
+            top: 0;
+            width: 1200px;
+            background-color: rgba(18, 18, 18, 0.95);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 1px solid #282828;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1DB954;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+            font-size: 28px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 30px;
+        }
+        
+        nav a {
+            color: #b3b3b3;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: #ffffff;
+        }
+        
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            background: linear-gradient(135deg, #121212 0%, #181818 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(29, 185, 84, 0.05) 0%, transparent 70%);
+            z-index: 1;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff, #1DB954);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+        
+        .hero p {
+            font-size: 24px;
+            color: #b3b3b3;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            background-color: #1DB954;
+            color: #121212;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+        }
+        
+        .features {
+            padding: 100px 40px;
+            background-color: #181818;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 60px;
+            color: #ffffff;
+        }
+        
+        .features-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            background-color: #282828;
+            border-radius: 10px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background-color: #333333;
+        }
+        
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background-color: #1DB954;
+            transition: height 0.3s ease;
+        }
+        
+        .feature-card:hover::before {
+            height: 100%;
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            color: #1DB954;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+        
+        .feature-card p {
+            color: #b3b3b3;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        footer {
+            background-color: #121212;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #282828;
+        }
+        
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .social-icon {
+            color: #b3b3b3;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            color: #1DB954;
+        }
+        
+        .copyright {
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+        
+        .music-waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .wave {
+            width: 6px;
+            background-color: rgba(29, 185, 84, 0.7);
+            border-radius: 3px;
+            animation: wave 1.2s infinite ease-in-out;
+        }
+        
+        .wave:nth-child(1) { height: 30px; animation-delay: 0.1s; }
+        .wave:nth-child(2) { height: 60px; animation-delay: 0.2s; }
+        .wave:nth-child(3) { height: 90px; animation-delay: 0.3s; }
+        .wave:nth-child(4) { height: 50px; animation-delay: 0.4s; }
+        .wave:nth-child(5) { height: 70px; animation-delay: 0.5s; }
+        .wave:nth-child(6) { height: 40px; animation-delay: 0.6s; }
+        .wave:nth-child(7) { height: 80px; animation-delay: 0.7s; }
+        
+        @keyframes wave {
+            0%, 100% {
+                transform: scaleY(1);
+            }
+            50% {
+                transform: scaleY(0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">
+        <i class="ri-music-fill"></i>
+        <span>VibeMatch</span>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>Connect Through Music</h1>
+        <p>Find friends who share your musical taste and discover new tracks together</p>
+        <button class="btn">
+            <i class="ri-spotify-fill"></i>
+            Login with Spotify
+        </button>
+    </div>
+    <div class="music-waves">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+</section>
+
+<section class="features">
+    <h2 class="section-title">Why VibeMatch?</h2>
+    <div class="features-container">
+        <div class="feature-card">
+            <i class="ri-user-heart-line feature-icon"></i>
+            <h3>Match by Taste</h3>
+            <p>Our algorithm analyzes your listening habits and connects you with people who share your unique music preferences.</p>
+        </div>
+        <div class="feature-card">
+            <i class="ri-disc-line feature-icon"></i>
+            <h3>Discover Together</h3>
+            <p>Create collaborative playlists with your matches and explore new artists and genres that you'll both enjoy.</p>
+        </div>
+        <div class="feature-card">
+            <i class="ri-message-3-line feature-icon"></i>
+            <h3>Music Chat</h3>
+            <p>Connect with your matches through our in-app messaging system and share your thoughts on your favorite tracks.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="social-icons">
+        <i class="ri-instagram-line social-icon"></i>
+        <i class="ri-twitter-x-line social-icon"></i>
+        <i class="ri-facebook-circle-line social-icon"></i>
+        <i class="ri-spotify-line social-icon"></i>
+    </div>
+    <p class="copyright">© 2025 VibeMatch. All rights reserved.</p>
+</footer>
+
+<script src="main.js" type="module"></script>
+
+</body>
+</html>

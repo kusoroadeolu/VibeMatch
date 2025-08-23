@@ -12,6 +12,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -23,20 +26,34 @@ public class SyncController {
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> syncUserData(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    //Syncs for 60 seconds(or has a 60 second delay)
+    public ResponseEntity<Map<String, String>> syncUserData(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String spotifyId = userPrincipal.getSpotifyId();
         User user = userQueryService.findBySpotifyId(spotifyId);
         log.info("Spotify ID: {}", spotifyId);
         String taskId = syncOrchestrator.scheduleUserSync(user);
-        return new ResponseEntity<>(taskId, HttpStatus.ACCEPTED);
+        if (taskId == null) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("message", "User has synced within the last 12 hours or a sync is already in progress."));
+        }
+        return new ResponseEntity<>(Map.of("taskId", taskId), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> getSyncStatus(@RequestParam String id){
+    public ResponseEntity<Map<String, String>> getSyncStatus(@RequestParam String id){
         TaskStatus taskStatus = syncOrchestrator.getSyncStatus(id);
-        return ResponseEntity.ok(taskStatus.getStatus());
+        return ResponseEntity.ok(Map.of("taskId", id, "status", taskStatus.getStatus()));
+
+    }
+
+    @GetMapping("/last-synced")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Map<String, Boolean>> getLastSyncedAt(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        boolean hasSyncedLast24Hours = syncOrchestrator.hasSyncedLast24Hours(userPrincipal.getId());
+        return ResponseEntity.ok(Map.of("hasSynced", hasSyncedLast24Hours));
+
     }
 
 

@@ -12,8 +12,7 @@ public interface UserRecentTrackRepository extends JpaRepository<UserRecentTrack
 
     List<UserRecentTrack> findByUser(User user);
 
-    @Query("DELETE FROM UserRecentTrack t WHERE t.user = :user")
-    int deleteByUser(@Param("user") User user);
+    void deleteByUser(User user);
 
     boolean existsByUser(User user);
 }

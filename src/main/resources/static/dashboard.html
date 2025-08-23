@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeMatch Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'AlibabaSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlibabaSans-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'AlibabaSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlibabaSans-Medium.otf') format('opentype');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'AlibabaSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/Alibaba-PuHuiTi-Bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'AlibabaSans', sans-serif;
+            line-height: 1.6;
+            width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* New CSS for the Sync Button */
+        .sync-button-container {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .sync-button {
+            background-color: #1DB954;
+            color: #121212;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            /* New: Adds space above the button */
+            margin-top: 30px;
+        }
+
+        .sync-button:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+        }
+
+        .sync-button i.ri-refresh-line {
+            transition: transform 0.5s ease;
+        }
+
+        .sync-button:hover i.ri-refresh-line {
+            transform: rotate(180deg);
+        }
+
+        .sync-button.spinning i.ri-refresh-line {
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* New CSS for hiding elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #282828;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1DB954;
+        }
+
+        .logo i {
+            margin-right: 8px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 30px;
+        }
+
+        nav ul li a {
+            color: #b3b3b3;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #ffffff;
+        }
+
+        nav ul li a.active {
+            color: #1DB954;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            display: flex;
+            align-items: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(to right, #1e1e1e, #282828);
+            border-radius: 10px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 30px;
+        }
+
+        .avatar i {
+            font-size: 48px;
+            color: #b3b3b3;
+        }
+
+        .welcome-text h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-text p {
+            color: #b3b3b3;
+            font-size: 16px;
+        }
+
+        /* Section Styles */
+        section {
+            margin-bottom: 50px;
+        }
+
+        section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        section h2::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            height: 20px;
+            width: 4px;
+            background-color: #1DB954;
+            border-radius: 2px;
+        }
+
+        /* Taste Profile Section */
+        .taste-profile {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .profile-card {
+            background-color: #282828;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-card h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #1DB954;
+        }
+
+        .genre-item, .artist-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .genre-item:last-child, .artist-item:last-child {
+            border-bottom: none;
+        }
+
+        .genre-name, .artist-name {
+            font-weight: 500;
+        }
+
+        .genre-percentage, .artist-rank {
+            color: #b3b3b3;
+        }
+
+        .genre-artist-count {
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+
+        .score-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1DB954;
+            margin-bottom: 10px;
+        }
+
+        .discovery-pattern {
+            margin-bottom: 15px;
+        }
+
+        .last-updated {
+            font-size: 12px;
+            color: #b3b3b3;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        /* Recommendations Section */
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .recommendation-card {
+            background-color: #282828;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background-color: #333;
+        }
+
+        .recommender {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .recommender-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .recommender-avatar i {
+            font-size: 20px;
+            color: #b3b3b3;
+        }
+
+        .recommender-name {
+            font-weight: 500;
+        }
+
+        .recommendation-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-type {
+            display: inline-block;
+            background-color: #1DB954;
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .spotify-link {
+            display: inline-flex;
+            align-items: center;
+            color: #1DB954;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .spotify-link:hover {
+            color: #1ed760;
+            text-decoration: underline;
+        }
+
+        .spotify-link i {
+            margin-right: 5px;
+        }
+
+        .recommendation-date {
+            font-size: 12px;
+            color: #b3b3b3;
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #b3b3b3;
+            border-top: 1px solid #282828;
+            margin-top: 50px;
+        }
+
+        .tagline {
+            font-weight: 500;
+        }
+
+        .tagline span {
+            color: #1DB954;
+        }
+    </style>
+</head>
+<body>
+<!-- Header: Hidden initially, shown after sync -->
+<header id="header" class="hidden">
+    <div class="logo">
+        <i class="ri-music-2-fill"></i>VibeMatch
+    </div>
+    <nav>
+        <ul>
+            <li><a href="#" data-view="dashboard" class="active">Dashboard</a></li>
+            <li><a href="#" data-view="connections">Connections</a></li>
+            <li><a href="#" data-view="logout" id="logout-link">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Static Content: Hidden initially, shown after sync -->
+<div id="static-content" class="hidden">
+    <div class="welcome-banner">
+        <div class="avatar">
+            <i class="ri-user-fill"></i>
+        </div>
+        <div class="welcome-text">
+            <h1>Welcome back, <span id="username-display">Alex</span></h1>
+            <p>Ready to discover new music and connect with like-minded listeners?</p>
+        </div>
+    </div>
+</div>
+
+<!-- Sync View: Shown initially, hidden after sync -->
+<div id="sync-view">
+    <section>
+        <h2>Sync Your Data</h2>
+        <div class="sync-button-container">
+            <p id="sync-status">To find your matches, please sync your Spotify data.</p>
+            <button id="sync-button" class="sync-button">
+                <i class="ri-refresh-line"></i>
+                Sync My Music
+            </button>
+        </div>
+    </section>
+</div>
+
+<!-- Profile View: Hidden initially, shown after sync -->
+<div id="profile-view" class="hidden">
+    <main>
+        <section>
+            <h2>Your Taste Profile</h2>
+            <div class="taste-profile">
+                <div class="profile-grid">
+                    <div class="profile-card">
+                        <h3>Top Genres</h3>
+                        <div class="genre-item">
+                            <div>
+                                <span class="genre-name">Indie Pop</span>
+                                <div class="genre-artist-count">32 artists</div>
+                            </div>
+                            <span class="genre-percentage">42%</span>
+                        </div>
+                        <div class="genre-item">
+                            <div>
+                                <span class="genre-name">Alternative Rock</span>
+                                <div class="genre-artist-count">28 artists</div>
+                            </div>
+                            <span class="genre-percentage">35%</span>
+                        </div>
+                        <div class="genre-item">
+                            <div>
+                                <span class="genre-name">Electronic</span>
+                                <div class="genre-artist-count">15 artists</div>
+                            </div>
+                            <span class="genre-percentage">18%</span>
+                        </div>
+                        <div class="genre-item">
+                            <div>
+                                <span class="genre-name">Hip Hop</span>
+                                <div class="genre-artist-count">5 artists</div>
+                            </div>
+                            <span class="genre-percentage">5%</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>Top Artists</h3>
+                        <div class="artist-item">
+                            <span class="artist-name">The 1975</span>
+                            <span class="artist-rank">#1</span>
+                        </div>
+                        <div class="artist-item">
+                            <span class="artist-name">Tame Impala</span>
+                            <span class="artist-rank">#2</span>
+                        </div>
+                        <div class="artist-item">
+                            <span class="artist-name">Glass Animals</span>
+                            <span class="artist-rank">#3</span>
+                        </div>
+                        <div class="artist-item">
+                            <span class="artist-name">MGMT</span>
+                            <span class="artist-rank">#4</span>
+                        </div>
+                        <div class="artist-item">
+                            <span class="artist-name">Arctic Monkeys</span>
+                            <span class="artist-rank">#5</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>Mainstream Score</h3>
+                        <div class="score-value">68</div>
+                        <p>Your taste is moderately mainstream with a good mix of popular and niche artists.</p>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>How You Listen</h3>
+                        <p class="how-you-listen">You tend to explore new music on weekends, primarily discovering through playlists and recommendations.</p>
+                        <div class="last-updated">Last updated: 2023-06-15T14:32:17Z</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Recommendations For You</h2>
+            <div class="recommendations-grid">
+                <!-- Dynamic content will be loaded here by recommendations.js -->
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<footer>
+    <p class="tagline">VibeMatch – <span>Find your perfect vibe.</span></p>
+</footer>
+<script src="main.js" type="module"></script>
+<script src="profile.js" type="module"></script>
+<script src="navigation.js"></script>
+<script src="recommendations.js"></script>
+
+</body>
+</html>

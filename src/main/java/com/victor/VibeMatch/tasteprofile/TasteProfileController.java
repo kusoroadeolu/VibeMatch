@@ -41,10 +41,10 @@ public class TasteProfileController {
 
     @DeleteMapping("/me")
     @PreAuthorize("hasRole('USER')")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteTasteProfile(@AuthenticationPrincipal UserPrincipal userPrincipal){
         tasteProfileService.removeTasteProfile(userPrincipal.getId());
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

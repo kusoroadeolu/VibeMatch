@@ -33,6 +33,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             throw new NoSuchConnectionException("Cannot send recommendation to a user you are not connected with.");
         }
 
+        log.info("Recommended item name: {}", requestDto.recommendedName());
+
         Recommendation recommendation = Recommendation.builder()
                 .recommender(recommender)
                 .recommendedTo(receiver)
@@ -56,8 +58,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         return recommendations.stream()
                 .map(rec -> new RecommendationResponseDto(
                         rec.getRecommender().getUsername(),
-                        rec.getSpotifyUrl(),
                         rec.getRecommendedName(),
+                        rec.getSpotifyUrl(),
                         rec.getType(),
                         rec.getCreatedAt()
                 ))

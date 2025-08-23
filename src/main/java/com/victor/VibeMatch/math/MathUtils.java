@@ -13,29 +13,23 @@ public class MathUtils{
 
     //Calculates the similarity between two collections of string
     public double calculateJaccardSimilarity(Collection<? extends String> a, Collection<? extends String> b){
-        int overlap = 0;
-        int aSize = a.size();
-        int bSize = b.size();
+        Set<String> aSet = new HashSet<>(a);
+        Set<String> bSet = new HashSet<>(b);
 
-        List<String> newList = new ArrayList<>(a);
+        Set<String> intersection = new HashSet<>(aSet);
+        intersection.retainAll(bSet);
+        int overlap = intersection.size();
 
-        log.info("A list size: {}", aSize);
-        log.info("B list size: {}", bSize);
+        Set<String> union = new HashSet<>(aSet);
+        union.addAll(bSet);
+        int unique = union.size();
 
-        for(int i = 0; i < aSize; i++){
-            String val = newList.get(i);
-            if(b.contains(val)){
-                overlap++;
-            }
+        if(unique == 0){
+            return 0.0;
         }
-        log.info("Overlap items: {}", overlap);
 
-        int unique = (aSize + bSize) - overlap;
-        log.info("Unique items: {}", unique);
+        return (double) overlap/unique;
 
-        double similarity = (double) overlap /unique;
-        log.info("Jaccard similarity: {}", similarity);
-        return similarity;
     }
 
     public double calculateCosineSimilarity(List<Double> weights1, List<Double> weights2){
@@ -64,6 +58,11 @@ public class MathUtils{
         log.info("Dot Product: {}", totalDotProduct);
         log.info("Weight 1 Square Root: {}", weight1Sqrt);
         log.info("Weight 2 Square Root: {}", weight2Sqrt);
+
+        if (weight1Sqrt == 0.0d || weight2Sqrt == 0.0d) {
+            log.warn("One of the vectors is a zero vector. Returning 0.0.");
+            return 0.0d;
+        }
 
         double cosineSimilarity = totalDotProduct / (weight1Sqrt * weight2Sqrt);
         log.info("Cosine similarity: {}", cosineSimilarity);

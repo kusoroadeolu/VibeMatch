@@ -8,6 +8,8 @@ public class ConnectionMapper {
         return new ActiveConnectionResponseDto(
                 connection.getRequester().getUsername(),
                 connection.getReceiver().getUsername(),
+                connection.getRequester().getId(),
+                connection.getReceiver().getId(),
                 connection.isConnected(),
                 connection.getConnectedSince()
         );
@@ -17,6 +19,8 @@ public class ConnectionMapper {
         return new InactiveConnectionResponseDto(
                 connection.getRequester().getUsername(),
                 connection.getReceiver().getUsername(),
+                connection.getRequester().getId(),
+                connection.getReceiver().getId(),
                 connection.isConnected(),
                 connection.getCreatedAt()
         );

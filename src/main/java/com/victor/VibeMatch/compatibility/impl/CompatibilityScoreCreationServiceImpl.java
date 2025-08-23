@@ -2,6 +2,8 @@ package com.victor.VibeMatch.compatibility.impl;
 
 import com.victor.VibeMatch.compatibility.CompatibilityCalculationService;
 import com.victor.VibeMatch.compatibility.embeddables.CompatibilityWrapper;
+import com.victor.VibeMatch.tasteprofile.TasteProfile;
+import com.victor.VibeMatch.tasteprofile.TasteProfileQueryService;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.userartist.UserArtist;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class CompatibilityScoreCreationServiceImpl implements com.victor.VibeMat
      * @return A list of their shared artists.
      * */
     @Override
+
     public List<CompatibilityWrapper> getSharedArtists(User user, User targetUser){
         List<UserArtist> userArtists = user.getUserArtists();
         List<UserArtist> targetUserArtists = targetUser.getUserArtists();
@@ -35,7 +38,6 @@ public class CompatibilityScoreCreationServiceImpl implements com.victor.VibeMat
         Map<String, UserArtist> userMap = userArtists
                 .stream()
                 .collect(Collectors.toMap(UserArtist::getArtistSpotifyId, a -> a));
-
         Map<String, UserArtist> targetUserMap = targetUserArtists
                 .stream()
                 .collect(Collectors.toMap(UserArtist::getArtistSpotifyId, a -> a));
@@ -44,13 +46,15 @@ public class CompatibilityScoreCreationServiceImpl implements com.victor.VibeMat
         Map<String, UserArtist> smallerMap;
 
         if(userMap.size() > targetUserMap.size()) {
+
             largerMap = userMap;
+
             smallerMap = targetUserMap;
         }else{
             largerMap = targetUserMap;
             smallerMap = userMap;
-        }
 
+        }
         List<CompatibilityWrapper> compatibilityWrappers = compatibilityCalculationService.getSharedArtists(largerMap, smallerMap);
         log.info("Successfully calculated users top shared artists");
         return compatibilityWrappers;
@@ -105,10 +109,13 @@ public class CompatibilityScoreCreationServiceImpl implements com.victor.VibeMat
      * */
     @Override
     public double getDiscoveryCompatibility(User user, User targetUser){
-        double userDiscoveryPattern = user.getTasteProfile().getDiscoveryPattern();
-        double targetUserDiscoveryPattern = targetUser.getTasteProfile().getDiscoveryPattern();
-        double userMainstreamScore = user.getTasteProfile().getMainstreamScore();
-        double targetUserMainstreamScore = targetUser.getTasteProfile().getMainstreamScore();
+        TasteProfile userTasteProfile = user.getTasteProfile();
+        TasteProfile targetUserTasteProfile = targetUser.getTasteProfile();
+
+        double userDiscoveryPattern = userTasteProfile.getDiscoveryPattern();
+        double targetUserDiscoveryPattern = targetUserTasteProfile.getDiscoveryPattern();
+        double userMainstreamScore = userTasteProfile.getMainstreamScore();
+        double targetUserMainstreamScore = targetUserTasteProfile.getMainstreamScore();
 
         log.info("User(Name: {}, Discovery Pattern: {}, Mainstream Score: {})", user.getUsername(), userDiscoveryPattern, userMainstreamScore);
         log.info("Target User(Name: {}, Discovery Pattern: {}, Mainstream Score: {})", targetUser.getUsername(), targetUserDiscoveryPattern, targetUserMainstreamScore);

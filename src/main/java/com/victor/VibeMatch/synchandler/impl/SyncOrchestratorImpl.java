@@ -9,7 +9,6 @@ import com.victor.VibeMatch.synchandler.services.UserArtistSyncService;
 import com.victor.VibeMatch.synchandler.services.UserTrackSyncService;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -33,13 +32,13 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     private final RabbitTemplate rabbitTemplate;
     private final RabbitSyncConfigProperties rabbitSyncConfigProperties;
     private final TaskService taskService;
+    private final UserQueryService userQueryService;
 
     /**
      * Syncs all user top tracks and artists
      * @param user The user
      * @return The date time of when the sync completed
      * */
-    @Transactional
     @Override
     public LocalDateTime syncAllData(User user){
         log.info("Initiating user data sync");
@@ -59,9 +58,19 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     }
 
     //Checks if a user has synced previously
+    @Override
     public boolean hasSyncedRecently(LocalDateTime now, User user){
         LocalDateTime lastSyncedAt = user.getLastSyncedAt();
         return lastSyncedAt != null && lastSyncedAt.isAfter(now.minusHours(12));
+    }
+
+    @Override
+    public boolean hasSyncedLast24Hours(UUID userId){
+        User user = userQueryService.findByUserId(userId);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastSyncedAt = user.getLastSyncedAt();
+        log.info("Successfully found last s");
+        return lastSyncedAt != null && lastSyncedAt.isAfter(now.minusHours(24));
     }
 
     /**

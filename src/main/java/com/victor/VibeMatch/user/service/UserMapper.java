@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 public class UserMapper {
     public UserResponseDto responseDto(User user){
         return new UserResponseDto(
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getCountry(),
-                user.getSpotifyId()
+                user.getSpotifyId(),
+                user.getImageUrl()
         );
     }
 }

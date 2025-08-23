@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -63,9 +64,22 @@ public class UserQueryServiceImpl implements UserQueryService{
     }
 
     @Override
+    public Optional<User> findOptionalUserBySpotifyId(String spotifyId){
+        return userRepository
+                .findBySpotifyId(spotifyId);
+    }
+
+    @Override
     public List<User> findAllUsers(){
         List<User> users = userRepository.findAll();
         log.info("Found {} users", users.size());
+        return users;
+    }
+
+    @Override
+    public List<User> findAllPublicUsers(){
+        List<User> users = userRepository.findAll();
+        log.info("Found {} public users", users.size());
         return users;
     }
 

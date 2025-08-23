@@ -13,6 +13,7 @@ import com.victor.VibeMatch.security.UserPrincipal;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserCommandService;
 import com.victor.VibeMatch.user.service.UserQueryService;
+import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,24 +46,30 @@ public class UserAuthServiceImpl implements UserAuthService{
     @Override
     public LoginResponseDto loginUser(SpotifyUserProfile userProfile,
                                       SpotifyTokenResponse tokenResponse){
+        log.info("Hit login user service");
         String spotifyId = userProfile.getId();
+
+        if (spotifyId == null) {
+            log.error("Spotify ID can not null.");
+            throw new AuthorizationException("Spotify ID can not null");
+        }
+
+        User user = userQueryService.findOptionalUserBySpotifyId(spotifyId).orElseGet(() -> {
+            log.info("Could not find user with spotify ID: {} in the DB", spotifyId);
+            User newUser = buildUserCredentials(userProfile, tokenResponse);
+            return userCommandService.saveUser(newUser);
+        });
+
+        userCommandService.updateRefreshToken(user, tokenResponse.getRefreshToken());
 
         //Map the spotify token response to the token dto
         TokenDto tokenDto = authMapper.tokenDto(tokenResponse);
-
-        if(spotifyId == null){
-            log.error("Spotify ID is null.");
-            throw new AuthorizationException("Spotify ID is null");
-        }
-
-        saveUserCredentials(spotifyId, tokenResponse, userProfile);
 
         //Cache the access token after save
         var token = tokenCacheService.cacheToken(spotifyId, tokenDto);
 
 
         log.info("Successfully cached token with refresh token: {}", token.refreshToken());
-
         return authMapper.loginResponseDto(userProfile.getDisplayName(), tokenDto.refreshToken(), assignTokenToUser(spotifyId));
     }
 
@@ -76,6 +83,7 @@ public class UserAuthServiceImpl implements UserAuthService{
                                      SpotifyTokenResponse tokenResponse, SpotifyUserProfile userProfile){
 
         if(!userQueryService.existsBySpotifyId(spotifyId)){
+            log.info("Could not find user with spotify ID: {}. Attempting to save user to DB", spotifyId);
             userCommandService.saveUser(buildUserCredentials(userProfile, tokenResponse));
         }else{
             var user = userQueryService.findBySpotifyId(spotifyId);
@@ -102,6 +110,14 @@ public class UserAuthServiceImpl implements UserAuthService{
      * */
     private User buildUserCredentials(SpotifyUserProfile spotifyUserProfile,
                                       SpotifyTokenResponse tokenResponse){
+        String imageUrl;
+        if(spotifyUserProfile.getImages().isEmpty()){
+            imageUrl = "";
+        }else{
+            imageUrl = spotifyUserProfile.getImages().getFirst().getUrl() != null ?
+                    spotifyUserProfile.getImages().getFirst().getUrl() : "";
+        }
+
         return User
                 .builder()
                 .username(spotifyUserProfile.getDisplayName())
@@ -109,6 +125,7 @@ public class UserAuthServiceImpl implements UserAuthService{
                 .email(spotifyUserProfile.getEmail())
                 .refreshToken(tokenResponse.getRefreshToken())
                 .country(spotifyUserProfile.getCountry())
+                .imageUrl(imageUrl)
                 .role(USER)
                 .build();
     }

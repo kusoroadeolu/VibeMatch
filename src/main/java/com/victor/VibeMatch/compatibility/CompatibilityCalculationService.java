@@ -5,6 +5,7 @@ import com.victor.VibeMatch.userartist.UserArtist;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface CompatibilityCalculationService {
     //Gets shared artists between users
@@ -17,4 +18,5 @@ public interface CompatibilityCalculationService {
 
     double calculateTasteCompatibility(List<UserArtist> artists1, List<UserArtist> artists2,
                                        List<UserArtist> filteredArtists1, List<UserArtist> filteredArtists2);
+
 }

@@ -46,6 +46,7 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
         log.info("Total Genre Count: {}", totalGenreCount);
 
         Map<String, Integer> topGenres = tasteProfileUtils.getTopGenres(artists);
+        log.info("Found: {} top genres for user: {}", topGenres.size() ,user.getUsername());
 
         List<TasteWrapper> tasteWrappers = new ArrayList<>();
 
@@ -68,7 +69,7 @@ public class TasteProfileCalculationServiceImpl implements TasteProfileCalculati
      * */
     @Override
     public List<TasteWrapper> calculateTopArtists(User user){
-        int limit = 3;
+        int limit = 5;
         List<UserArtist> artists = userArtistQueryService.findArtistsByUserOrderByRanking(user, limit);
 
         log.info("Found top {} artists for user: {}", artists.size(), user.getUsername());

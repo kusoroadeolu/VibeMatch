@@ -2,6 +2,7 @@ package com.victor.VibeMatch.connections;
 
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class ConnectionServiceImpl implements ConnectionService {
     public List<InactiveConnectionResponseDto> findPendingReceivedConnections(UUID userId){
         User user = userQueryService.findByUserId(userId);
         List<Connection> connections = connectionQueryService.findPendingReceivedConnections(user);
-        log.info("Found {} received inactive connections for user: {}", connections.size(), user.getUsername());
+        log.info("Received {} connection requests for user: {}", connections.size(), user.getUsername());
         return connections.stream().map(connectionMapper::toInActiveResponseDto).toList();
     }
 
@@ -77,6 +78,7 @@ public class ConnectionServiceImpl implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public ConnectionWrapperResponseDto requestConnection(UUID requesterId, UUID receiverId){
         User requester = userQueryService.findByUserId(requesterId);
         User receiver = userQueryService.findByUserId(receiverId);
@@ -91,22 +93,28 @@ public class ConnectionServiceImpl implements ConnectionService {
             canonicalUserB = requester;
         }
 
+        Optional<Connection> optionalConnection =
+                connectionQueryService.findInactiveConnection(canonicalUserA, canonicalUserB);
+
+        //Check if an inactive connection request is present
+        if(optionalConnection.isPresent()){
+            connection = optionalConnection.get();
+
+            if(!connection.getRequester().getId().equals(requesterId)){
+                log.info("{} previously sent a request to {}", connection.getRequester(), connection.getReceiver());
+                acceptConnection(connection.getRequester().getId(), connection.getReceiver().getId());
+                log.info("Successfully accepted both connection request for both users");
+                return new ConnectionWrapperResponseDto(connectionMapper.toActiveResponseDto(connection), null);
+            }else{
+                return new ConnectionWrapperResponseDto(null, connectionMapper.toInActiveResponseDto(connection));
+            }
+
+        }
 
         //Check if you already have a connection with this user
         if(connectionQueryService.activeConnectionExists(canonicalUserA, canonicalUserB)){
             connection = connectionQueryService.findConnection(canonicalUserA, canonicalUserB);
             log.info("You already have an active connection with this user");
-            return new ConnectionWrapperResponseDto(connectionMapper.toActiveResponseDto(connection), null);
-        }
-
-        Optional<Connection> optionalConnection =
-                connectionQueryService.findInactiveConnection(canonicalUserA, canonicalUserB);
-
-        if(optionalConnection.isPresent()){
-            connection = optionalConnection.get();
-            log.info("{} previously sent a request to {}", connection.getRequester(), connection.getReceiver());
-            acceptConnection(connection.getRequester().getId(), connection.getReceiver().getId());
-            log.info("Successfully accepted both connection request for both users");
             return new ConnectionWrapperResponseDto(connectionMapper.toActiveResponseDto(connection), null);
         }
 
@@ -120,6 +128,7 @@ public class ConnectionServiceImpl implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public void removeConnection(UUID userIdA, UUID userIdB){
         User userA = userQueryService.findByUserId(userIdA);
         User userB = userQueryService.findByUserId(userIdB);
@@ -127,12 +136,12 @@ public class ConnectionServiceImpl implements ConnectionService {
     }
 
     @Override
+    @Transactional
     public ActiveConnectionResponseDto acceptConnection(UUID requesterId, UUID receiverId){
         User requester = userQueryService.findByUserId(requesterId);
         User receiver = userQueryService.findByUserId(receiverId);
         Connection connection = connectionQueryService.findPendingConnectionBetween(requester, receiver);
-        connection.setConnected(true);
-        connection.setConnectedSince(LocalDateTime.now());
+        connection.acceptConnection();
         Connection savedConnection = connectionCommandService.saveConnection(connection);
         return connectionMapper.toActiveResponseDto(savedConnection);
     }

@@ -84,7 +84,7 @@ class UserQueryServiceImplTest {
     public void getUserData_shouldReturnUserData_whenGivenUsername(){
         //Arrange
         String spotifyId = "mock-id";
-        var responseDto = new UserResponseDto("", "", "", spotifyId);
+        var responseDto = new UserResponseDto(UUID.randomUUID(), "", "", "" , spotifyId, "");
 
         //When
         when(userRepository.findBySpotifyId(spotifyId)).thenReturn(Optional.of(user));
@@ -108,7 +108,7 @@ class UserQueryServiceImplTest {
     public void getUserData_shouldReturnUserData_whenGivenSpotifyId(){
         //Arrange
         String spotifyId = "mock-id";
-        var responseDto = new UserResponseDto("mock-name", "mock-email", "mock-country", spotifyId);
+        var responseDto = new UserResponseDto(UUID.randomUUID(), "", "", "" , spotifyId, "");
 
         //When
         when(userRepository.findBySpotifyId(spotifyId)).thenReturn(Optional.of(user));

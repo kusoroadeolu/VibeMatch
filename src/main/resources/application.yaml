@@ -21,7 +21,7 @@ spring:
         exchange-name: sync-exchange
         queue-name: sync-queue
         routing-key: sync-key
-        ttl: 60000
+        ttl: 30000
 
 
   data:
@@ -40,6 +40,8 @@ spring:
       client:
         registration:
           spotify:
+            client-id: ${SPOTIFY_CLIENT_ID}
+            client-secret: ${SPOTIFY_CLIENT_SECRET}
             redirect-uri: "http://127.0.0.1:8080/auth/callback"
             scope: user-top-read,user-read-email,user-read-private
             authorization-grant-type: authorization_code
@@ -62,7 +64,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         show_sql: true
