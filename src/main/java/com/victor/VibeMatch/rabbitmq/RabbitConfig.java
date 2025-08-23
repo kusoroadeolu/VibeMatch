@@ -3,6 +3,7 @@ package com.victor.VibeMatch.rabbitmq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +21,7 @@ import java.util.Map;
 public class RabbitConfig {
 
     private final RabbitSyncConfigProperties rabbitSyncConfigProperties;
+    private final RabbitFactoryConfigProperties factoryConfigProperties;
 
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory, @Qualifier("rabbitExecutor") ThreadPoolTaskExecutor asyncRabbitListenerExecutor){
@@ -25,6 +29,18 @@ public class RabbitConfig {
         factory.setConnectionFactory(connectionFactory);
         factory.setTaskExecutor(asyncRabbitListenerExecutor);
         factory.setPrefetchCount(1);
+        return factory;
+    }
+
+    @Bean
+    public CachingConnectionFactory cachingConnectionFactory() throws NoSuchAlgorithmException, KeyManagementException {
+        CachingConnectionFactory factory = new CachingConnectionFactory();
+        factory.setHost(factoryConfigProperties.getCloudHost());
+        factory.setPort(factoryConfigProperties.getPort());
+        factory.setUsername(factoryConfigProperties.getUsername());
+        factory.setVirtualHost(factoryConfigProperties.getVHost());
+        factory.setPassword(factoryConfigProperties.getPassword());
+        factory.getRabbitConnectionFactory().useSslProtocol();
         return factory;
     }
 

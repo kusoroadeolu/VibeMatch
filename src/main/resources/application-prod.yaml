@@ -12,10 +12,12 @@ spring:
     name: VibeMatch
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:guest}
-    password: ${RABBITMQ_PASS:guest}
+    factory:
+      cloud-host: rattlesnake.rmq.cloudamqp.com
+      port: 5671
+      username: ykbkqtqi
+      v-host: ykbkqtqi
+      password: ${RABBITMQ_PASSWORD}
     prop:
       sync:
         exchange-name: sync-exchange
@@ -91,14 +93,8 @@ scheduled:
   compatibility-cron: 0 0 3 * * *
 
 cookies:
-  set-secure: true
-  set-http-only: true
+  secure: true
+  http-only: true
   max-age: 3600
 
-server:
-  servlet:
-    session:
-      cookie:
-        secure: true
-        http-only: true
-        same-site: none
+

@@ -29,10 +29,10 @@ public class SpotifyAuthController {
     private final UserAuthService userAuthService;
     private final JwtConfigProperties jwtConfigProperties;
 
-    @Value("${cookies.set-secure}")
+    @Value("${cookies.secure}")
     private boolean setSecure;
 
-    @Value("${cookies.set-http-only}")
+    @Value("${cookies.http-only}")
     private boolean setHttpOnly;
 
     @Value("${cookies.max-age}")
@@ -79,7 +79,7 @@ public class SpotifyAuthController {
         jwtCookie.setHttpOnly(setHttpOnly);
         jwtCookie.setSecure(setSecure);
         jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(jwtConfigProperties.getExpiration() * 1000);
+        jwtCookie.setMaxAge(jwtConfigProperties.getExpiration());
 
         Cookie refreshCookie = new Cookie("refreshToken", responseDto.refreshToken());
         refreshCookie.setHttpOnly(setHttpOnly);
@@ -87,11 +87,9 @@ public class SpotifyAuthController {
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(maxAge);
 
-        // 2. Add cookies to the HTTP response
         response.addCookie(jwtCookie);
         response.addCookie(refreshCookie);
 
-        // 3. Redirect to the dashboard.html without any query parameters
         return new RedirectView("/dashboard.html");
     }
 

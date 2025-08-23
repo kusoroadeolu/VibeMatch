@@ -5,17 +5,18 @@ spring:
     short-time: short_term
     medium-time: medium_term
     track-count: 30
-    artist-count: 25
+    artist-count: 50
     scope: user-top-read
 
   application:
     name: VibeMatch
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    factory:
+      cloud-host: rattlesnake.rmq.cloudamqp.com
+      port: 5671
+      username: ykbkqtqi
+      v-host: ykbkqtqi
     prop:
       sync:
         exchange-name: sync-exchange
@@ -40,8 +41,6 @@ spring:
       client:
         registration:
           spotify:
-            client-id: ${SPOTIFY_CLIENT_ID}
-            client-secret: ${SPOTIFY_CLIENT_SECRET}
             redirect-uri: "http://127.0.0.1:8080/auth/callback"
             scope: user-top-read,user-read-email,user-read-private
             authorization-grant-type: authorization_code
@@ -90,6 +89,9 @@ scheduled:
   threshold-in-hours: 24
   compatibility-cron: 0 0 3 * * *
 
-
+cookies:
+  secure: true
+  http-only: false
+  max-age: 3600
 
 
