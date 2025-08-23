@@ -10,6 +10,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,15 @@ public class SpotifyAuthController {
     private final SpotifyAuthService spotifyAuthService;
     private final UserAuthService userAuthService;
     private final JwtConfigProperties jwtConfigProperties;
+
+    @Value("${cookies.set-secure}")
+    private boolean setSecure;
+
+    @Value("${cookies.set-http-only}")
+    private boolean setHttpOnly;
+
+    @Value("${cookies.max-age}")
+    private int maxAge;
 
     @GetMapping("/login")
     @ResponseStatus(HttpStatus.FOUND)
@@ -66,16 +76,16 @@ public class SpotifyAuthController {
 
         // 1. Create HTTP-only cookies for tokens
         Cookie jwtCookie = new Cookie("jwtToken", responseDto.jwtToken());
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(false);
+        jwtCookie.setHttpOnly(setHttpOnly);
+        jwtCookie.setSecure(setSecure);
         jwtCookie.setPath("/");
         jwtCookie.setMaxAge(jwtConfigProperties.getExpiration() * 1000);
 
         Cookie refreshCookie = new Cookie("refreshToken", responseDto.refreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false); // Set to true for production (HTTPS)
+        refreshCookie.setHttpOnly(setHttpOnly);
+        refreshCookie.setSecure(setSecure);
         refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(7 * 24 * 3600);
+        refreshCookie.setMaxAge(maxAge);
 
         // 2. Add cookies to the HTTP response
         response.addCookie(jwtCookie);

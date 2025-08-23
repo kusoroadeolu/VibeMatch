@@ -1,0 +1,104 @@
+spring:
+  spotify:
+    tracks-uri: https://api.spotify.com/v1/me/top/tracks
+    artists-uri: https://api.spotify.com/v1/me/top/artists
+    short-time: short_term
+    medium-time: medium_term
+    track-count: 35
+    artist-count: 50
+    scope: user-top-read
+
+  application:
+    name: VibeMatch
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    prop:
+      sync:
+        exchange-name: sync-exchange
+        queue-name: sync-queue
+        routing-key: sync-key
+        ttl: 30000
+
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  cache:
+    type: redis
+    token-time-in-hours: 1
+    profile-time-in-hours: 1
+
+
+  security:
+    oauth2:
+      client:
+        registration:
+          spotify:
+            client-id: ${SPOTIFY_CLIENT_ID}
+            client-secret: ${SPOTIFY_CLIENT_SECRET}
+            redirect-uri: "http://127.0.0.1:8080/auth/callback"
+            scope: user-top-read,user-read-email,user-read-private
+            authorization-grant-type: authorization_code
+        provider:
+          spotify:
+            authorization-uri: https://accounts.spotify.com/authorize
+            token-uri: https://accounts.spotify.com/api/token
+            user-info-uri: https://api.spotify.com/v1/me
+            api-uri: https://accounts.spotify.com/api/v1
+            user-name-attribute: me
+
+
+
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/vibematch
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        hbm2ddl:
+          halt_on_error: false
+        use_sql_comments: true
+    show-sql: true
+
+  logging:
+    level:
+      org.hibernate.SQL: DEBUG
+      org.hibernate.tool.schema: DEBUG
+      org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: WARN
+      root: INFO
+
+jwt:
+  secret: 833ca894019d51c760adeb6d10ecfa8d1e6d30ccc12301e6b163be23aa21adb8
+  expiration: 3600
+
+scheduled:
+  refresh-user-data: 7200000
+  threshold-in-hours: 24
+  compatibility-cron: 0 0 3 * * *
+
+cookies:
+  set-secure: true
+  set-http-only: true
+  max-age: 3600
+
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: none
