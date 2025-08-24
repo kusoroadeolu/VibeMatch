@@ -19,8 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -119,9 +118,10 @@ class CompatibilityScoreCreationServiceImplTest {
     void getTasteCompatibility_should_return_correct_score() {
         // Arrange
         double expectedScore = 0.85;
+        int sharedArtists = 1;
 
         when(compatibilityCalculationService.calculateTasteCompatibility(
-                anyList(), anyList(), anyList(), anyList()
+                anyList(), anyList(), anyList(), anyList(), sharedArtists
         )).thenReturn(expectedScore);
 
         // Act
@@ -130,7 +130,7 @@ class CompatibilityScoreCreationServiceImplTest {
         // Assert
         assertEquals(expectedScore, result);
         verify(compatibilityCalculationService).calculateTasteCompatibility(
-                anyList(), anyList(), anyList(), anyList()
+                anyList(), anyList(), anyList(), anyList(), anyInt()
         );
     }
 

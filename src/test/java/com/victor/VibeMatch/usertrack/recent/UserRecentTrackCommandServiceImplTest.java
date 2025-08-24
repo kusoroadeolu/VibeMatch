@@ -116,8 +116,6 @@ class UserRecentTrackCommandServiceImplTest {
 
     @Test
     void deleteAllRecentTracksByUser_shouldDeleteSuccessfully() {
-        // Arrange
-        when(userRecentTrackRepository.deleteByUser(testUser)).thenReturn(2);
 
         // Act & Assert
         assertDoesNotThrow(() -> userRecentTrackCommandService.deleteAllRecentTracksByUser(testUser));
@@ -126,8 +124,6 @@ class UserRecentTrackCommandServiceImplTest {
 
     @Test
     void deleteAllRecentTracksByUser_shouldHandleNoTracksFound() {
-        // Arrange
-        when(userRecentTrackRepository.deleteByUser(testUser)).thenReturn(0);
 
         // Act & Assert
         assertDoesNotThrow(() -> userRecentTrackCommandService.deleteAllRecentTracksByUser(testUser));

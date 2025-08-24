@@ -17,6 +17,6 @@ public interface CompatibilityCalculationService {
     double calculateDiscoveryCompatibility(double discoveryScore1, double discoveryScore2, double mainstreamScore1, double mainstreamScore2);
 
     double calculateTasteCompatibility(List<UserArtist> artists1, List<UserArtist> artists2,
-                                       List<UserArtist> filteredArtists1, List<UserArtist> filteredArtists2);
+                                       List<UserArtist> filteredArtists1, List<UserArtist> filteredArtists2, int sharedArtistSize);
 
 }

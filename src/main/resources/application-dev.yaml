@@ -17,6 +17,7 @@ spring:
       port: 5671
       username: ykbkqtqi
       v-host: ykbkqtqi
+      password:
     prop:
       sync:
         exchange-name: sync-exchange
@@ -41,6 +42,8 @@ spring:
       client:
         registration:
           spotify:
+            client-id:
+            client-secret:
             redirect-uri: "http://127.0.0.1:8080/auth/callback"
             scope: user-top-read,user-read-email,user-read-private
             authorization-grant-type: authorization_code
@@ -52,18 +55,15 @@ spring:
             api-uri: https://accounts.spotify.com/api/v1
             user-name-attribute: me
 
-
-
-
   datasource:
-    url: jdbc:mysql://localhost:3306/vibematch
-    username: root
+    url: jdbc:postgresql://localhost:5432/vibematch
+    username: postgres
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true

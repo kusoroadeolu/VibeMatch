@@ -166,11 +166,14 @@ public class CompatibilityScoreCreationServiceImpl implements com.victor.VibeMat
             filteredArtists1.add(userMap.get(artistId));
             filteredArtists2.add(targetUserMap.get(artistId));
         }
+        int sharedArtistsSize = sharedArtistsIds.size();
         
         double compatibility = compatibilityCalculationService.calculateTasteCompatibility(
-                userArtists, targetUserArtists, filteredArtists1, filteredArtists2
+                userArtists, targetUserArtists, filteredArtists1, filteredArtists2, sharedArtistsSize
         );
-        log.info("Successfully calculated taste compatibility for user: {} and target user: {}. Behavioral Compatibility: {}", user.getUsername(), targetUser.getUsername(), compatibility);
+        log.info("Successfully calculated taste compatibility for user: {} and target user: {}. Taste Compatibility: {}", user.getUsername(), targetUser.getUsername(), compatibility);
+        log.info("Shared artists: {}", sharedArtistsIds.size());
+        log.info("Final compatibility: {}", compatibility);
         return compatibility;
     }
 

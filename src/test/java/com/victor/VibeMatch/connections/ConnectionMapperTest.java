@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +41,8 @@ class ConnectionMapperTest {
         ActiveConnectionResponseDto expected = new ActiveConnectionResponseDto(
                 "user1",
                 "user2",
+                UUID.randomUUID(),
+                UUID.randomUUID(),
                 true,
                  connection.getConnectedSince()
         );
@@ -61,6 +64,8 @@ class ConnectionMapperTest {
         InactiveConnectionResponseDto expected = new InactiveConnectionResponseDto(
                 "user1",
                 "user2",
+                UUID.randomUUID(),
+                UUID.randomUUID(),
                 true,
                 connection.getCreatedAt()
         );

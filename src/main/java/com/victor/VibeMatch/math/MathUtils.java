@@ -37,6 +37,8 @@ public class MathUtils{
         double totalDotProduct = 0.0d;
         double totalWeight1Sqr = 0.0d;
         double totalWeight2Sqr = 0.0d;
+        log.info("Weights 1 size: {}", weights1.size());
+        log.info("Weights 2 size: {}", weights2.size());
 
         for(int i = 0; i < weights1.size(); i++){
             double weight1 = weights1.get(i);
@@ -93,13 +95,15 @@ public class MathUtils{
 
 
     public double calculateUserArtistWeightedVector(int rank, int maxRank, int popularity){
-        int invertedRank = invertRank(rank, maxRank);
-        return (0.75 * invertedRank) + (0.25 * popularity);
+        double invertedRank = (double)invertRank(rank, maxRank)/maxRank;
+        double normalizedPopularity = (double) popularity /100;
+        return (0.75 * invertedRank) + (0.25 * normalizedPopularity);
     }
 
     public double calculateUserArtistWeightedVectorPopularitySkewed(int rank, int maxRank ,int popularity){
-        int invertedRank = invertRank(rank, maxRank);
-        return (0.4 * invertedRank) + (0.6 * popularity);
+        double invertedRank = (double) invertRank(rank, maxRank) /maxRank;
+        double normalizedPopularity = (double) popularity /100;
+        return (0.4 * invertedRank) + (0.6 * normalizedPopularity);
     }
 
     //Normalize artist ranks to point in the direction of popularity

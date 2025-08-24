@@ -89,10 +89,10 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
 
     @Override
     public double calculateTasteCompatibility(List<UserArtist> artists1, List<UserArtist> artists2,
-                                              List<UserArtist> filteredArtists1, List<UserArtist> filteredArtists2){
+                                              List<UserArtist> filteredArtists1, List<UserArtist> filteredArtists2, int sharedArtistsSize){
         int artist1Size = artists1.size();
         int artist2Size = artists2.size();
-        int threshold = 65;
+        int threshold = 55;
 
         //Calculate the avg pop of the first artists
         double artists1AvgPop = (double) artists1
@@ -101,7 +101,7 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
                 .reduce(0, Integer::sum) / artist1Size;
 
         //Calculate the avg pop of the second artist list
-        double artists2AvgPop = (double) artists1
+        double artists2AvgPop = (double) artists2
                 .stream()
                 .map(UserArtist::getPopularity)
                 .reduce(0, Integer::sum) / artist2Size;
@@ -128,7 +128,8 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
         double genreOverlap = mathUtils.calculateJaccardSimilarity(genres1, genres2);
         log.info("Genre similarity: {}", genreOverlap);
 
-        return (artistSimilarity + genreOverlap) * .5;
+        double sharedRatio = Math.sqrt((double) sharedArtistsSize / Math.min(artist1Size, artist2Size));
+        return (artistSimilarity + genreOverlap) * .5 * sharedRatio;
     }
 
 

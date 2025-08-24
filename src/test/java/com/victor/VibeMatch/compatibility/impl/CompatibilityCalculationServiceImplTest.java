@@ -226,10 +226,11 @@ class CompatibilityCalculationServiceImplTest {
 
         double expectedCompatibility = (0.7 * 0.5) + (0.5 * 0.5); // (artistSimilarity * 0.5) + (genreOverlap * 0.5)
         double delta = 0.001;
+        int sharedArtists = 1;
 
         // Act
         double actualCompatibility = compatibilityCalculationService.calculateTasteCompatibility(
-                artists1, artists2, artists1, artists2
+                artists1, artists2, artists1, artists2, sharedArtists
         );
 
         // Assert

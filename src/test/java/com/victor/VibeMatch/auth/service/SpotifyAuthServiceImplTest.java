@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -133,7 +134,8 @@ public class SpotifyAuthServiceImplTest {
                 "mock-name",
                 "mock-email",
                 "mock-id",
-                "mock-country"
+                "mock-country",
+                List.of()
         );
         ResponseEntity<SpotifyUserProfile> mockProfileEntity = new ResponseEntity<>(mockProfile, HttpStatus.OK);
         String authToken = "Bearer mock-token";

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user", uniqueConstraints = {
+@Table(name = "app_user", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"spotify_id", "username"})
 }, indexes = @Index(name = "si_index", columnList = "spotifyId"))
 @AllArgsConstructor

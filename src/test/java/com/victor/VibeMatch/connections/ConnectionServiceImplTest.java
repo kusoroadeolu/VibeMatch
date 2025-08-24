@@ -65,9 +65,9 @@ class ConnectionServiceImplTest {
                 .requester(userGamma).receiver(userAlpha).isConnected(false).createdAt(LocalDateTime.now()).build();
 
         // Arrange: Mock DTOs and their wrappers
-        activeDto = new ActiveConnectionResponseDto("req", "rec", true, LocalDateTime.now());
-        inactiveDto2 = new InactiveConnectionResponseDto("userAlpha", "userGamma", false, pendingRequestAG.getCreatedAt());
-        inactiveDto = new InactiveConnectionResponseDto("req", "rec", false, LocalDateTime.now());
+        activeDto = new ActiveConnectionResponseDto("req", "rec", UUID.randomUUID(), UUID.randomUUID(), true, LocalDateTime.now());
+        inactiveDto2 = new InactiveConnectionResponseDto("userAlpha", "userGamma", UUID.randomUUID(), UUID.randomUUID(), false, pendingRequestAG.getCreatedAt());
+        inactiveDto = new InactiveConnectionResponseDto("req", "rec", UUID.randomUUID(), UUID.randomUUID(), false ,LocalDateTime.now());
 
         wrapperActiveDto = new ConnectionWrapperResponseDto(activeDto, null);
         wrapperInactiveDto = new ConnectionWrapperResponseDto(null, inactiveDto);
