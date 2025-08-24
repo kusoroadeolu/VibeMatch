@@ -17,7 +17,7 @@ spring:
       port: 5671
       username: ykbkqtqi
       v-host: ykbkqtqi
-      password:
+      password: JfM_Mg_2rBsm9iLz9NUWElLEnVNKnL32
     prop:
       sync:
         exchange-name: sync-exchange
@@ -42,8 +42,8 @@ spring:
       client:
         registration:
           spotify:
-            client-id:
-            client-secret:
+            client-id: b0c01202a70b45edadd31c6344abcb83
+            client-secret: c69a6bd210764ccebbdba8dd91f41cc6
             redirect-uri: "http://127.0.0.1:8080/auth/callback"
             scope: user-top-read,user-read-email,user-read-private
             authorization-grant-type: authorization_code
