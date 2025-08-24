@@ -59,10 +59,8 @@ spring:
 
 
   datasource:
-    url: jdbc:mysql://localhost:3306/vibematch
-    username: root
-    password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/vibematch}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
