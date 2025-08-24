@@ -44,7 +44,7 @@ spring:
           spotify:
             client-id: ${SPOTIFY_CLIENT_ID}
             client-secret: ${SPOTIFY_CLIENT_SECRET}
-            redirect-uri: "http://127.0.0.1:8080/auth/callback"
+            redirect-uri: "https://vibematch-od18.onrender.com/auth/callback"
             scope: user-top-read,user-read-email,user-read-private
             authorization-grant-type: authorization_code
         provider:
