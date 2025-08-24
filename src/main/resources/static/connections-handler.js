@@ -187,7 +187,6 @@ class ConnectionsManager {
         const username = card.querySelector('.connection-username').textContent;
         const userId = this.getUserIdFromCard(card);
 
-        // ✅ Better error handling
         if (!userId) {
             console.error('Could not find user ID for accept request');
             console.error('Card data:', card.dataset);

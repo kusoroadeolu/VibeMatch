@@ -55,6 +55,9 @@ public class CompatibilityScorePersistenceServiceImpl implements CompatibilitySc
         if(score.getDiscoveryCompatibility() >= 0.6 && score.getTasteCompatibility() >= 0.7){
              compatibilityScoreCommandService.saveCompatibilityScore(score);
              log.info("Successfully saved compatibility score for user: {} and target user: {}", user.getUsername(), targetUser.getUsername());
+        }else{
+            log.info("Compatibility score below threshold, not saving. Discovery: {}, Taste: {}",
+                    score.getDiscoveryCompatibility(), score.getTasteCompatibility());
         }
 
         return compatibilityScoreMapper.responseDto(score);

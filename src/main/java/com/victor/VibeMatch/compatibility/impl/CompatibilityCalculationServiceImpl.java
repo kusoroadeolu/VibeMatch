@@ -20,7 +20,7 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
     //Gets shared artists between users
     @Override
     public List<CompatibilityWrapper> getSharedArtists(Map<String, UserArtist> map1, Map<String, UserArtist> map2){
-        List<CompatibilityWrapper> sharedArtists = new LinkedList<>();
+        List<CompatibilityWrapper> sharedArtists = new ArrayList<>();
         int count = 0;
 
         for(Map.Entry<String, UserArtist> entry: map1.entrySet()){
@@ -41,8 +41,15 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
     }
 
     //Gets shared genres
+
     @Override
     public List<CompatibilityWrapper> getSharedGenres(List<String> genres1, List<String> genres2){
+
+        // Handle edge cases
+        if(genres1 == null || genres2 == null || genres1.isEmpty() || genres2.isEmpty()) {
+            log.info("One or both genre lists are empty/null");
+            return new ArrayList<>();
+        }
 
         int genres1Size = genres1.size();
         int genres2Size = genres2.size();
@@ -50,17 +57,22 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
         Map<String, Integer> genres1Map = mathUtils.mapCountToKey(genres1);
         Map<String, Integer> genres2Map = mathUtils.mapCountToKey(genres2);
 
-        List<CompatibilityWrapper> sharedGenres = new LinkedList<>();
+        Set<String> genres2Set = new HashSet<>(genres2);
+
+        List<CompatibilityWrapper> sharedGenres = new ArrayList<>();
+        Set<String> processedGenres = new HashSet<>();
         int count = 0;
 
         for(String genre : genres1){
-            if(genres2.contains(genre) && count < 3){
-                double yourPercentage = (double) genres1Map.get(genre) /genres1Size;
-                double theirPercentage = (double) genres2Map.get(genre) /genres2Size;
+            if(genres2Set.contains(genre) && count < 3 && !processedGenres.contains(genre)){
+                double yourPercentage = (double) genres1Map.get(genre) / genres1Size;
+                double theirPercentage = (double) genres2Map.get(genre) / genres2Size;
 
                 sharedGenres.add(
-                        new CompatibilityWrapper(genre, yourPercentage , theirPercentage)
+                        new CompatibilityWrapper(genre, yourPercentage, theirPercentage)
                 );
+
+                processedGenres.add(genre);
                 count++;
             }
         }
@@ -79,8 +91,8 @@ public class CompatibilityCalculationServiceImpl implements com.victor.VibeMatch
 
         double discoverySimilarity = 1 - discoveryDistance;
         double mainstreamSimilarity = 1 - mainstreamDistance;
-        log.info("Discovery similarity: {}", discoveryDistance);
-        log.info("Mainstream similarity: {}", mainstreamDistance);
+        log.info("Discovery similarity: {}", discoverySimilarity);
+        log.info("Mainstream similarity: {}", mainstreamSimilarity);
 
         double compatibility = (0.7*discoverySimilarity)+(0.3*mainstreamSimilarity);
         log.info("Discover compatibility: {}", compatibility);

@@ -28,8 +28,8 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
   cache:
     type: redis
@@ -56,13 +56,18 @@ spring:
             user-name-attribute: me
 
 
-
-
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 15        # Max connections in pool
+      minimum-idle: 3              # Min idle connections kept alive
+      connection-timeout: 30000    # Wait 30s for connection from pool
+      idle-timeout: 600000         # Close idle connections after 10 minutes
+      max-lifetime: 1800000        # Kill connections after 30 minutes
+      leak-detection-threshold: 60000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -79,13 +84,13 @@ spring:
 
   logging:
     level:
-      org.hibernate.SQL: DEBUG
-      org.hibernate.tool.schema: DEBUG
+      org.hibernate.SQL: WARN
+      org.hibernate.tool.schema: WARN
       org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: WARN
       root: INFO
 
 jwt:
-  secret: 833ca894019d51c760adeb6d10ecfa8d1e6d30ccc12301e6b163be23aa21adb8
+  secret: ${JWT_SECRET}
   expiration: 3600
 
 scheduled:

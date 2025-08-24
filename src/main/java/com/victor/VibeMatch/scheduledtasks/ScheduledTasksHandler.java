@@ -41,7 +41,6 @@ public class ScheduledTasksHandler {
         log.info("Found: {} users that haven't synced in {} hours", users.size(), thresholdInHours);
 
 
-
         for(User user: users){
             try{
                 syncOrchestrator.scheduleUserSync(user);

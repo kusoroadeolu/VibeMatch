@@ -52,7 +52,7 @@ public class CompatibilityScoreMapper {
         for(CompatibilityWrapper genre: genres){
             double yourPercentage = genre.getYour();
             double theirPercentage = genre.getTheir();
-            dtos.add(new GenreCompatibilityDto(genre.getName(), mathUtils.round(yourPercentage), mathUtils.round(theirPercentage)));
+            dtos.add(new GenreCompatibilityDto(genre.getName(), mathUtils.round(yourPercentage) * 100, mathUtils.round(theirPercentage) * 100));
         }
         return dtos;
     }
