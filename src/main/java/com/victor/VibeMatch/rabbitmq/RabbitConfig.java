@@ -57,7 +57,7 @@ public class RabbitConfig {
 
     @Bean
     public Queue syncQueue(){
-        return new Queue(rabbitSyncConfigProperties.getQueueName(), false);
+        return new Queue(rabbitSyncConfigProperties.getQueueName(), true);
     }
 
     @Bean
@@ -81,7 +81,7 @@ public class RabbitConfig {
         args.put("x-message-ttl", rabbitSyncConfigProperties.getTtl());
         args.put("x-dead-letter-exchange", rabbitSyncConfigProperties.getExchangeName());
         args.put("x-dead-letter-routing-key", rabbitSyncConfigProperties.getRoutingKey());
-        return new Queue(rabbitSyncConfigProperties.getQueueName() + ".delay", false, false, true, args);
+        return new Queue(rabbitSyncConfigProperties.getQueueName() + ".delay", true, false, false, args);
     }
 
     @Bean
