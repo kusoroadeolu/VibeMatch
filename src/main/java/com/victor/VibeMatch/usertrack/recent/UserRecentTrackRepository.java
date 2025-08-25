@@ -2,6 +2,7 @@ package com.victor.VibeMatch.usertrack.recent;
 
 import com.victor.VibeMatch.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,7 +13,9 @@ public interface UserRecentTrackRepository extends JpaRepository<UserRecentTrack
 
     List<UserRecentTrack> findByUser(User user);
 
-    void deleteByUser(User user);
+    @Modifying
+    @Query("DELETE FROM UserRecentTrack ut WHERE ut.user = :user")
+    void deleteByUser(@Param("user") User user);
 
     boolean existsByUser(User user);
 }
