@@ -1,6 +1,8 @@
 package com.victor.VibeMatch.user;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +15,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsBySpotifyId(String spotifyId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findBySpotifyId(String spotifyId);
 
     List<User> findByLastSyncedAtBefore(LocalDateTime now);
