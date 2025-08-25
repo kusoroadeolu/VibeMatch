@@ -60,7 +60,8 @@ public class UserQueryServiceImpl implements UserQueryService{
 
         return userRepository
                 .findBySpotifyId(spotifyId)
-                .orElseThrow(() -> new NoSuchUserException(String.format("Failed to find user with spotify ID: %s in the DB", spotifyId)));
+                .orElseThrow(() ->
+                        new NoSuchUserException(String.format("Failed to find user with spotify ID: %s in the DB", spotifyId)));
     }
 
     @Override
@@ -88,6 +89,13 @@ public class UserQueryServiceImpl implements UserQueryService{
         List<User> users = userRepository.findByLastSyncedAtBefore(then);
         log.info("Found {} users who haven't been synced for 24 hours", users.size());
         return users;
+    }
+
+    @Override
+    public User findBySpotifyIdWithLock(String spotifyId){
+        return userRepository.findUserBySpotifyIdWithLock(spotifyId).orElseThrow(() -> new NoSuchUserException(
+                String.format("Failed to find user with spotify ID: %s in the DB", spotifyId)
+        ));
     }
 
     @Override

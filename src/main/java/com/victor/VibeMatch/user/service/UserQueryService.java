@@ -21,6 +21,8 @@ public interface UserQueryService {
 
     List<User> findAllUsers();
 
+    User findBySpotifyIdWithLock(String spotifyId);
+
     boolean existsBySpotifyId(String spotifyId);
 
     List<User> findAllPublicUsers();

@@ -43,25 +43,26 @@ public class UserArtistSyncServiceImpl<T> implements UserArtistSyncService {
      * Sync User Artist Data
      * @param user The user being synced
      * */
-    @Transactional
     @Override
     public List<UserArtist> syncUserArtist(User user){
         log.info("Initiating sync for {} top artists.", user.getUsername());
 
         List<SpotifyArtist> spotifyArtists = fetchUserTopArtist(user.getSpotifyId());
 
-        if (spotifyArtists.isEmpty())return List.of();
+        if (spotifyArtists.isEmpty()){
+            return List.of();
+        }
+
+        userArtistCommandService.deleteByUser(user);
+        log.info("Successfully deleted artists for user: {}" ,user.getUsername());
 
         log.info("Successfully fetched spotify artists for user: {}", user.getUsername());
-
         List<UserArtist> userArtists = spotifyArtists
                 .stream()
                 .map(artist -> userArtistMapper.buildUserArtist(user, artist))
                 .toList();
 
-        if(userArtistQueryService.existsByUser(user)){
-            userArtistCommandService.deleteByUser(user);
-        }
+
 
         return userArtistCommandService.saveUserArtists(userArtists);
     }

@@ -46,7 +46,7 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
      * Sync User Recent Track Data
      * @param user The user being synced
      * */
-    @Transactional
+
     @Override
     public List<UserRecentTrack> syncRecentUserTracks(User user){
         log.info("Initiating sync for {} recent tracks.", user.getUsername());
@@ -55,14 +55,20 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
         List<SpotifyTrack> recentTracks = fetchTracks(user.getSpotifyId(), buildRecentTrackDto());
         log.info("Successfully fetched: {} recent tracks for user: {}", recentTracks.size(), user.getUsername());
 
+        if(recentTracks.isEmpty()){
+            return List.of();
+        }
+
+        userRecentTrackCommandService.deleteAllRecentTracksByUser(user);
+        log.info("Successfully deleted recent tracks for user: {}" ,user.getUsername());
+
         List<UserRecentTrack> userRecentTracks = recentTracks
                 .stream()
                 .map(recentTrack -> userTrackUtils.buildUserRecentTrack(recentTrack, user))
                 .toList();
 
-        if(userRecentTrackQueryService.existsByUser(user)){
-            userRecentTrackCommandService.deleteAllRecentTracksByUser(user);
-        }
+
+
         return userRecentTrackCommandService.saveRecentTracks(userRecentTracks);
     }
 
@@ -70,12 +76,21 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
      * Sync User Top Track Data
      * @param user The user being synced
      * */
-    @Transactional
     @Override
     public List<UserTopTrack> syncTopUserTracks(User user){
         log.info("Initiating sync for {} top tracks.", user.getUsername());
 
         List<SpotifyTrack> recentTracks = fetchTracks(user.getSpotifyId(), buildTopTrackDto());
+
+
+        if(recentTracks.isEmpty()){
+            return List.of();
+        }
+
+        userTopTrackCommandService.deleteAllTopTracksByUser(user);
+        log.info("Successfully deleted top tracks for user: {}" ,user.getUsername());
+
+
         log.info("Successfully fetched: {} top tracks for user: {}", recentTracks.size(), user.getUsername());
 
         List<UserTopTrack> userTopTracks = recentTracks
@@ -85,9 +100,6 @@ public class UserTrackSyncServiceImpl<T> implements UserTrackSyncService {
 
         userTopTracks.forEach(userTopTrack -> System.out.println("TRACK NAME: " + userTopTrack.getName() + "\n"));
 
-        if(userTopTrackQueryService.existsByUser(user)){
-            userTopTrackCommandService.deleteAllTopTracksByUser(user);
-        }
         return userTopTrackCommandService.saveTopTracks(userTopTracks);
     }
 

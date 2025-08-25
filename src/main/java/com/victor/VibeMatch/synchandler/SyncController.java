@@ -29,12 +29,13 @@ public class SyncController {
     //Syncs for 60 seconds(or has a 60 second delay)
     public ResponseEntity<Map<String, String>> syncUserData(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String spotifyId = userPrincipal.getSpotifyId();
-        User user = userQueryService.findBySpotifyId(spotifyId);
-        log.info("Spotify ID: {}", spotifyId);
+        User user = userQueryService.findBySpotifyIdWithLock(spotifyId);
         String taskId = syncOrchestrator.scheduleUserSync(user);
+
         if (taskId == null) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("message", "User has synced within the last 12 hours or a sync is already in progress."));
         }
+
         return new ResponseEntity<>(Map.of("taskId", taskId), HttpStatus.ACCEPTED);
     }
 

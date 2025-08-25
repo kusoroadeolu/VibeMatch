@@ -9,6 +9,7 @@ import com.victor.VibeMatch.synchandler.services.UserArtistSyncService;
 import com.victor.VibeMatch.synchandler.services.UserTrackSyncService;
 import com.victor.VibeMatch.user.User;
 import com.victor.VibeMatch.user.service.UserQueryService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -40,6 +41,7 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
      * @return The date time of when the sync completed
      * */
     @Override
+    @Transactional
     public LocalDateTime syncAllData(User user){
         log.info("Initiating user data sync");
         try{

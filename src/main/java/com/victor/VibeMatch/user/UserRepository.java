@@ -19,5 +19,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findByLastSyncedAtBefore(LocalDateTime now);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<User> findUserBySpotifyIdWithLock(String spotifyId);
+
     List<User> findByIsPublicTrue();
 }
