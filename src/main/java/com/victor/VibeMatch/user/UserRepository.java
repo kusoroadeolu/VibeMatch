@@ -15,7 +15,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsBySpotifyId(String spotifyId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findBySpotifyId(String spotifyId);
 
     List<User> findByLastSyncedAtBefore(LocalDateTime now);

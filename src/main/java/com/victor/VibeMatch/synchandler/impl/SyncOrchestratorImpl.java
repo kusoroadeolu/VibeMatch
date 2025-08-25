@@ -43,10 +43,9 @@ public class SyncOrchestratorImpl implements SyncOrchestrator {
     public LocalDateTime syncAllData(User user){
         log.info("Initiating user data sync");
         try{
-            CompletableFuture<Void> artistSync = runAsync(() -> userArtistSyncService.syncUserArtist(user));
-            CompletableFuture<Void> recentTrackSync = runAsync(() -> userTrackSyncService.syncRecentUserTracks(user));
-            CompletableFuture<Void> topTrackSync = runAsync(() -> userTrackSyncService.syncTopUserTracks(user));
-            allOf(artistSync, recentTrackSync, topTrackSync).join();
+            userArtistSyncService.syncUserArtist(user);
+            userTrackSyncService.syncRecentUserTracks(user);
+            userTrackSyncService.syncTopUserTracks(user);
         }catch (Exception e){
             log.info("An unexpected error occurred while trying to sync data for  user: {}", user.getUsername());
             throw new UserSyncException(String.format("An unexpected error occurred while trying to sync data for  user: %s", user.getUsername()));
