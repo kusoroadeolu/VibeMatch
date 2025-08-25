@@ -29,7 +29,7 @@ public class SyncController {
     //Syncs for 60 seconds(or has a 60 second delay)
     public ResponseEntity<Map<String, String>> syncUserData(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String spotifyId = userPrincipal.getSpotifyId();
-        User user = userQueryService.findBySpotifyIdWithLock(spotifyId);
+        User user = userQueryService.findBySpotifyId(spotifyId);
         String taskId = syncOrchestrator.scheduleUserSync(user);
 
         if (taskId == null) {
