@@ -23,7 +23,7 @@ spring:
         exchange-name: sync-exchange
         queue-name: sync-queue
         routing-key: sync-key
-        ttl: 30000
+        ttl: 20000
 
 
   data:
