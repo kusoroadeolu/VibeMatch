@@ -13,10 +13,10 @@ spring:
 
   rabbitmq:
     factory:
-      cloud-host: rattlesnake.rmq.cloudamqp.com
+      cloud-host: goose.rmq2.cloudamqp.com
       port: 5671
-      username: ykbkqtqi
-      v-host: ykbkqtqi
+      username: shxkhvpv
+      v-host: shxkhvpv
       password: ${RABBITMQ_PASSWORD}
     prop:
       sync:
